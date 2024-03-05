@@ -1,8 +1,8 @@
 ﻿using Model;
 
-namespace ConsoleViewWithFlex;
+namespace ConsoleView;
 
-public class ConsoleView : IObserver
+public class ConsoleView : IView
 {
 	public void ShowChange(GameBoard gameBoard)
 	{
@@ -40,10 +40,12 @@ public class ConsoleView : IObserver
 
 	public void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask)
 	{
-		Console.WriteLine("==========================");
+		Console.WriteLine(" |=a==b==c==d==e==f==g==h=|");
+		var rowN = 1;
 		foreach (var collumn in gameBoard.Board)
 		{
-			var row = "=";
+			var row = rowN.ToString() + "|";
+			rowN++;
 			foreach (var cell in collumn)
 			{
 				switch (cell.CellState)
@@ -64,11 +66,11 @@ public class ConsoleView : IObserver
 						break;
 				}
 			}
-			row += "=";
+			row += "|";
 			Console.WriteLine(row);
 			
 			
 		}
-		Console.WriteLine("==========================");
+		Console.WriteLine(" ==========================");
 	}
 }

@@ -8,9 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ConsoleControllerWithFlex\ConsoleControllerWithFlex.csproj" />
-      <ProjectReference Include="..\ConsoleViewWithFlex\ConsoleViewWithFlex.csproj" />
-      <ProjectReference Include="..\InputParser\InputParser.csproj" />
+      <ProjectReference Include="..\ConsoleController\ConsoleController.csproj" />
+      <ProjectReference Include="..\ConsoleView\ConsoleView.csproj" />
       <ProjectReference Include="..\Model\Model.csproj" />
     </ItemGroup>
 

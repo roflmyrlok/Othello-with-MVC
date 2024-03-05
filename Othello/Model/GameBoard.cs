@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Model
 {
@@ -26,10 +25,11 @@ namespace Model
             }
         }
 
-        public List<List<bool>> GetAvailableMoves()
+        public List<List<bool>> GetAvailableMoves(CellState cellState)
         {
             var availableMoves = new List<List<bool>>();
 
+            // Initialize the availableMoves matrix
             for (int i = 0; i < Columns; i++)
             {
                 availableMoves.Add(new List<bool>());
@@ -39,17 +39,20 @@ namespace Model
                 }
             }
 
+            // Iterate over each cell on the board
             for (int i = 0; i < Columns; i++)
             {
                 for (int j = 0; j < Rows; j++)
                 {
+                    Cell cell = Board[i][j];
+
                     // Check if the cell is empty
-                    if (Board[i][j].CellState == CellState.Empty)
+                    if (cell.CellState == CellState.Empty)
                     {
-                        // Check if any neighboring cell contains a player's piece
-                        if (IsNeighborOccupied(i, j))
+                        // Check if placing a piece in this cell flips any opponent pieces
+                        if (IsValidMove(i, j, cellState))
                         {
-                            availableMoves[i][j] = true;
+                            availableMoves[i][j] = true; // Mark the cell as available
                         }
                     }
                 }
@@ -58,30 +61,130 @@ namespace Model
             return availableMoves;
         }
 
-        private bool IsNeighborOccupied(int x, int y)
+        // Helper method to check if placing a piece in a cell flips any opponent pieces
+        private bool IsValidMove(int col, int row, CellState cellState)
         {
-            // Check the eight neighboring cells
-            for (int dx = -1; dx <= 1; dx++)
+            // Check in all eight directions
+            int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
+            int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+            for (int d = 0; d < 8; d++)
             {
-                for (int dy = -1; dy <= 1; dy++)
+                int x = row + dx[d];
+                int y = col + dy[d];
+
+                // Skip if the adjacent cell is out of bounds or empty
+                if (x < 0 || x >= Columns || y < 0 || y >= Rows || Board[x][y].CellState == CellState.Empty)
+                    continue;
+
+                // If the adjacent cell contains an opponent's piece, continue searching in this direction
+                if (Board[x][y].CellState != cellState)
                 {
-                    int newX = x + dx;
-                    int newY = y + dy;
-
-                    // Skip if out of bounds or the current cell
-                    if (newX < 0 || newX >= Columns || newY < 0 || newY >= Rows || (dx == 0 && dy == 0))
+                    while (x >= 0 && x < Columns && y >= 0 && y < Rows && Board[x][y].CellState != CellState.Empty)
                     {
-                        continue;
-                    }
-
-                    // Check if the neighboring cell is occupied by a player's piece
-                    if (Board[newX][newY].CellState != CellState.Empty)
-                    {
-                        return true;
+                        // If we find our own piece, this move is valid
+                        if (Board[x][y].CellState == cellState)
+                            return true;
+                        x += dx[d];
+                        y += dy[d];
                     }
                 }
             }
+
             return false;
+        }
+        public void MakeMove(int row, int col, CellState player)
+        {
+            if (Board[row][col].CellState != CellState.Empty)
+            {
+                throw new InvalidOperationException("Invalid move: Cell is not empty.");
+            }
+
+            bool validMove = false;
+
+            // Check in all eight directions
+            int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
+            int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+            for (int d = 0; d < 8; d++)
+            {
+                int x = row + dx[d];
+                int y = col + dy[d];
+
+                // Skip if the adjacent cell is out of bounds or empty
+                if (x < 0 || x >= Columns || y < 0 || y >= Rows || Board[x][y].CellState == CellState.Empty || Board[x][y].CellState == player)
+                    continue;
+
+                // If the adjacent cell contains an opponent's piece, continue searching in this direction
+                if (Board[x][y].CellState != player)
+                {
+                    while (x >= 0 && x < Columns && y >= 0 && y < Rows && Board[x][y].CellState != CellState.Empty)
+                    {
+                        // If we find our own piece, this move is valid
+                        if (Board[x][y].CellState == player)
+                        {
+                            validMove = true;
+                            break;
+                        }
+                        x += dx[d];
+                        y += dy[d];
+                    }
+                }
+            }
+
+            if (!validMove)
+            {
+                throw new InvalidOperationException("Invalid move: Move does not flip any opponent pieces.");
+            }
+
+            // Place the player's piece on the board
+            Board[row][col].CellState = player;
+
+            // Flip opponent pieces
+            FlipOpponentPieces(row, col, player);
+        }
+
+        // Helper method to flip opponent pieces
+        private void FlipOpponentPieces(int row, int col, CellState player)
+        {
+            // Check in all eight directions
+            int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
+            int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+            for (int d = 0; d < 8; d++)
+            {
+                int x = row + dx[d];
+                int y = col + dy[d];
+
+                List<Cell> flippedPieces = new List<Cell>();
+
+                // Skip if the adjacent cell is out of bounds or empty or contains player's own piece
+                if (x < 0 || x >= Columns || y < 0 || y >= Rows || Board[x][y].CellState == CellState.Empty || Board[x][y].CellState == player)
+                    continue;
+
+                // If the adjacent cell contains an opponent's piece, continue searching in this direction
+                if (Board[x][y].CellState != player)
+                {
+                    while (x >= 0 && x < Columns && y >= 0 && y < Rows && Board[x][y].CellState != CellState.Empty)
+                    {
+                        // If we find our own piece, flip the opponent pieces in between
+                        if (Board[x][y].CellState == player)
+                        {
+                            foreach (var piece in flippedPieces)
+                            {
+                                piece.CellState = player;
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            flippedPieces.Add(Board[x][y]);
+                        }
+                        x += dx[d];
+                        y += dy[d];
+                    }
+                }
+            }
         }
     }
 }
