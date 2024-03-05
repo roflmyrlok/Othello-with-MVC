@@ -2,7 +2,7 @@ namespace Model;
 
 public interface IObserver
 {
-	public void ShowChange(GameBoard gameBoard);
-
-	public void ShowInputError(string inputError);
+	void ShowChange(GameBoard gameBoard);
+	void ShowInputError(string inputError);
+	void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask);
 }

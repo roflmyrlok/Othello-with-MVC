@@ -3,77 +3,97 @@ namespace Model;
 public class Game
 {
 
-	private PlayerColour PlayerColour;
-	private List<IObserver> GameObservers;
-	private GameBoard CurrentGame;
-	private Player Player1;
-	private Player Player2;
-	private int lastPlayer;
+	private readonly PlayerColour _playerColour;
+	private readonly List<IObserver> _gameObservers;
+	private List<List<bool>> _availabilityMask = new List<List<bool>>();
+	private GameBoard _currentGame;
+	private Player _player1;
+	private Player _player2;
+	private Player _currentPlayer;
+	private bool _autoHint = true;
 
 
 	public Game(IObserver gameObserver)
 	{
-		PlayerColour = new PlayerColour();
-		GameObservers = new List<IObserver>();
-		GameObservers.Add(gameObserver);
+		_playerColour = new PlayerColour();
+		_gameObservers = new List<IObserver>();
+		_gameObservers.Add(gameObserver);
 	}
 	
 	public void SetUpNewPvPGame(string player1Colour = "white", string player2Colour = "black", int columns = 8, int rows = 8)
 	{
-		Player1 = new HumanPlayer(PlayerColour.GetColourByName(player1Colour), CellState.Player1); 
-		Player2 = new HumanPlayer(PlayerColour.GetColourByName(player2Colour), CellState.Player2);
-		CurrentGame = new GameBoard(rows, columns);
+		_player1 = new HumanPlayer(_playerColour.GetColourByName(player1Colour), CellState.Player1); 
+		_player2 = new HumanPlayer(_playerColour.GetColourByName(player2Colour), CellState.Player2);
+		_currentGame = new GameBoard(rows, columns);
 		_observe();
 	}
 
 	public void Start()
 	{
-		CurrentGame.Board[3][4].CellState = CellState.Player1;
-		CurrentGame.Board[4][3].CellState = CellState.Player1;
-		CurrentGame.Board[4][4].CellState = CellState.Player2;
-		CurrentGame.Board[3][3].CellState = CellState.Player2;
-		lastPlayer = 2;
+		_currentGame.Board[3][4].CellState = CellState.Player1;
+		_currentGame.Board[4][3].CellState = CellState.Player1;
+		_currentGame.Board[4][4].CellState = CellState.Player2;
+		_currentGame.Board[3][3].CellState = CellState.Player2;
+		_currentPlayer = _player1;
 		_observe();
 	}
 	
 	public void MakeMove(int column, int row)
 	{
-		Player currPlayerMove = null;
-		if (lastPlayer == 1)
+		_setAvailableMoves();
+		if (!_availabilityMask[column][row])
 		{
-			currPlayerMove = Player2;
-			lastPlayer = 2;
+			throw new Exception("move not available");
 		}
-		else if (lastPlayer == 2)
+		_currentGame.Board[column - 1][row - 1].CellState = _currentPlayer.CurrentPlayerCellState;
+		_endTurn();
+	}
+
+	public void Hint()
+	{
+		_showAvailableMoves();
+	}
+
+
+
+	private void _endTurn()
+	{
+		if (_currentPlayer == _player1)
 		{
-			currPlayerMove = Player1;
-			lastPlayer = 1;
+			_currentPlayer = _player2;
 		}
-		//proper logic for internal move call from here
-		if (CurrentGame.Board[column - 1][row - 1].CellState != CellState.Available)
+		else if (_currentPlayer == _player2)
 		{
-			_errorObserve("cell not available");
-			return;
+			_currentPlayer = _player1;
 		}
-		CurrentGame.Board[column - 1][row - 1].CellState = currPlayerMove.CurrentPlayerCellState;
-		
 		_observe();
 	}
-	
-
 	private void _observe()
 	{
-		foreach (var obs in GameObservers)
+		if (_autoHint)
 		{
-			obs.ShowChange(CurrentGame);
+			_showAvailableMoves();
+			return;
+		}
+		foreach (var obs in _gameObservers)
+		{
+			obs.ShowChange(_currentGame);
 			
 		}
 	}
-	private void _errorObserve(string errorType)
+
+	private void _showAvailableMoves()
 	{
-		foreach (var obs in GameObservers)
+		_setAvailableMoves();
+		foreach (var obs in _gameObservers)
 		{
-			obs.ShowInputError(errorType);
+			obs.ShowAvailabgleMoves(_currentGame, _availabilityMask);
+			
 		}
+	}
+
+	private void _setAvailableMoves()
+	{
+		_availabilityMask = _currentGame.GetAvailableMoves();
 	}
 }
