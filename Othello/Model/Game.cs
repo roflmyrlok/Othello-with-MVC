@@ -3,77 +3,101 @@ namespace Model;
 public class Game
 {
 
-	private PlayerColour PlayerColour;
-	private List<IObserver> GameObservers;
-	private GameBoard CurrentGame;
-	private Player Player1;
-	private Player Player2;
-	private int lastPlayer;
+	private readonly PlayerColour _playerColour;
+	private readonly IView _gameView;
+	private readonly IInputErrorNotifier _errorNotifier;
+	private List<List<bool>> _availabilityMask = new List<List<bool>>();
+	private GameBoard _currentGame;
+	private Player _player1;
+	private Player _player2;
+	private Player _currentPlayer;
+	private bool _autoHint = true;
 
 
-	public Game(IObserver gameObserver)
+	public Game(IView gameView, IInputErrorNotifier errorNotifier)
 	{
-		PlayerColour = new PlayerColour();
-		GameObservers = new List<IObserver>();
-		GameObservers.Add(gameObserver);
+		_playerColour = new PlayerColour();
+		_gameView = gameView;
+		_errorNotifier = errorNotifier;
 	}
 	
 	public void SetUpNewPvPGame(string player1Colour = "white", string player2Colour = "black", int columns = 8, int rows = 8)
 	{
-		Player1 = new HumanPlayer(PlayerColour.GetColourByName(player1Colour), CellState.Player1); 
-		Player2 = new HumanPlayer(PlayerColour.GetColourByName(player2Colour), CellState.Player2);
-		CurrentGame = new GameBoard(rows, columns);
-		_observe();
+		_player1 = new HumanPlayer(_playerColour.GetColourByName(player1Colour), CellState.Player1); 
+		_player2 = new HumanPlayer(_playerColour.GetColourByName(player2Colour), CellState.Player2);
+		_currentGame = new GameBoard(rows, columns);
+		_currentPlayer = _player1;
 	}
 
 	public void Start()
 	{
-		CurrentGame.Board[3][4].CellState = CellState.Player1;
-		CurrentGame.Board[4][3].CellState = CellState.Player1;
-		CurrentGame.Board[4][4].CellState = CellState.Player2;
-		CurrentGame.Board[3][3].CellState = CellState.Player2;
-		lastPlayer = 2;
-		_observe();
+		_currentGame.Board[3][4].CellState = CellState.Player1;
+		_currentGame.Board[4][3].CellState = CellState.Player1;
+		_currentGame.Board[4][4].CellState = CellState.Player2;
+		_currentGame.Board[3][3].CellState = CellState.Player2;
+		_currentPlayer = _player1;
+		_view();
 	}
 	
-	public void MakeMove(int column, int row)
+	public void MakeMove(int columnR, int rowR)
 	{
-		Player currPlayerMove = null;
-		if (lastPlayer == 1)
-		{
-			currPlayerMove = Player2;
-			lastPlayer = 2;
-		}
-		else if (lastPlayer == 2)
-		{
-			currPlayerMove = Player1;
-			lastPlayer = 1;
-		}
-		//proper logic for internal move call from here
-		if (CurrentGame.Board[column - 1][row - 1].CellState != CellState.Available)
-		{
-			_errorObserve("cell not available");
+		var column = columnR - 1;
+		var row = rowR - 1;
+		_setAvailableMoves();
+		if (!_availabilityMask[row][column])
+		{ 
+			//tmp solution
+			_showError("move not available");
 			return;
 		}
-		CurrentGame.Board[column - 1][row - 1].CellState = currPlayerMove.CurrentPlayerCellState;
-		
-		_observe();
+		_currentGame.MakeMove(row, column, _currentPlayer.CurrentPlayerCellState);
+		_endTurn();
 	}
-	
 
-	private void _observe()
+	public void Hint()
 	{
-		foreach (var obs in GameObservers)
-		{
-			obs.ShowChange(CurrentGame);
-			
-		}
+		_showAvailableMoves();
 	}
-	private void _errorObserve(string errorType)
+
+
+
+	private void _endTurn()
 	{
-		foreach (var obs in GameObservers)
+		if (_currentPlayer == _player1)
 		{
-			obs.ShowInputError(errorType);
+			_currentPlayer = _player2;
 		}
+		else if (_currentPlayer == _player2)
+		{
+			_currentPlayer = _player1;
+		}
+		_view();
+		//tmp solution
+		_showError("currentplayer : " + _currentPlayer.CurrentPlayerCellState);
+	}
+	private void _view()
+	{
+		if (_autoHint)
+		{
+			_showAvailableMoves();
+			return;
+		}
+		_gameView.ShowChange(_currentGame);
+	}
+
+	private void _showError(string msg)
+	{
+		_errorNotifier.ShowInputError(msg);
+	}
+
+	private void _showAvailableMoves()
+	{
+		_setAvailableMoves();
+		_gameView.ShowAvailableMoves(_currentGame, _availabilityMask);
+	}
+
+	private void _setAvailableMoves()
+	{
+		_availabilityMask = _currentGame.GetAvailableMoves(_currentPlayer.CurrentPlayerCellState);
 	}
 }

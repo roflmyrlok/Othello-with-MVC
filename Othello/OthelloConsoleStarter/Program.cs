@@ -1,16 +1,30 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using Model;
+using ConsoleController;
+using ConsoleView;
 
 Console.WriteLine("pudge");
 
-var o = new ConsoleViewWithFlex.ConsoleView();
-var c = new ConsoleControllerWithFlex.ConsoleController(o);
+var o = new ConsoleView.ConsoleView();
+var en = new ConsoleErrorNotifier();
+var c = new ConsoleController.ConsoleController(o, en);
 while (true)
 {
-	string input = Console.ReadLine();
-	var i = new InputParser.Input(input);
-	c.Act(i.GetParsedInput());
+	(int, int) arg; ;
+	try
+	{
+		var input = Console.ReadLine();
+		var parser = new Input(input);
+		arg = parser.GetParsedInput();
+	}
+	catch (Exception e)
+	{
+		Console.WriteLine(e);
+		throw;
+	}
+	
+	
+	c.Act(arg);
 }
 
 
