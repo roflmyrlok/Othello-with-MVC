@@ -6,7 +6,7 @@ The goal of this assignment is to implement a console-based Reversi (Othello) ga
 
 
 ### Task
-1. Implement a [Reversi](https://en.wikipedia.org/wiki/Reversi) game playable through the command-line interface (CLI). There are lot of places on the internet where you can try playing reversi, e.g. [here](https://cardgames.io/reversi/) or [here](https://www.crazygames.com/game/reversi-online)
+1. Implement a [Reversi](https://en.wikipedia.org/wiki/Reversi) game playable through the command-line interface (CLI). There are lot of places on the  internet where you can try playing reversi, e.g. [here](https://cardgames.io/reversi/) or [here](https://www.crazygames.com/game/reversi-online)
 2. The game should adhere to the rules of Reversi, also known as Othello.
 3. Players should be able to make moves by inputting coordinates for their desired move.
 4. The game must support player vs. player (PvP) and player vs. simple bot (PvE) modes.
@@ -17,15 +17,6 @@ The goal of this assignment is to implement a console-based Reversi (Othello) ga
 9. Player can ask for a hint and get all possible moves highlighted.
 10. Include comprehensive unit tests to validate the functionality of the game components.  Unit tests should cover critical aspects such as move validation, game state transitions, and edge cases. 
 
-### Grading policy
-Maximum points: 10
-- 3 points - basic game logic with ability to win and lose in PvP, restart;
-- 2 points - PvE mode
-- 1 point - hints, undos and time limits
-- 1 point - unit tests;
-- 1 point - overall code quality;
-- 1 point - extra task
-- 1 point - theoretical answers.
 
 ### Learning materials
 There is a lot of confusing materials about MVC on the internet, I recommend to start with original [explanation by Martin Fowler](https://martinfowler.com/eaaDev/uiArchs.html), author of Refactoring book and a short video fragment from [Robert Martin talk](https://youtu.be/Nsjsiz2A9mg?si=CobGPXOk6evh2wEr&t=1893) on a conference.
