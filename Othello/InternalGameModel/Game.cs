@@ -25,7 +25,7 @@ public class Game : IInteractive
 		_setAvailableMoves();
 		if (_currentGame.IsValidMovePublic(row, column, _currentPlayer.CurrentPlayerCellState))
 		{ 
-			_gameView.ShowEventCellOccupied();
+			_gameView.ShowEventCellOccupied(_currentPlayer.CurrentPlayerCellState);
 			return;
 		}
 		_currentGame.MakeMove(row, column, _currentPlayer.CurrentPlayerCellState);
@@ -35,6 +35,7 @@ public class Game : IInteractive
 	
 	private void _endTurn()
 	{
+		
 		if (_currentPlayer.CurrentPlayerCellState == CellState.Player1)
 		{
 			_currentPlayer.CurrentPlayerCellState = CellState.Player2;
@@ -43,16 +44,23 @@ public class Game : IInteractive
 		{
 			_currentPlayer.CurrentPlayerCellState = CellState.Player1;
 		}
+
+		if (_currentGame.AnyMovesAvailable(_currentPlayer.CurrentPlayerCellState))
+		{
+			return;
+		}
+		_gameView.ShowEventWinCondition(_currentGame.CalculateWinner());
+		
 	}
 	private void _view()
 	{
-		_gameView.ShowChange(_currentGame);
+		_gameView.ShowChange(_currentGame, _currentPlayer.CurrentPlayerCellState);
 	}
 
 	private void _showAvailableMoves()
 	{
 		_setAvailableMoves();
-		_gameView.ShowAvailableMoves(_currentGame, _availabilityMask);
+		_gameView.ShowAvailableMoves(_currentGame, _availabilityMask, _currentPlayer.CurrentPlayerCellState);
 	}
 
 	private void _setAvailableMoves()
