@@ -81,11 +81,17 @@ namespace Model
             return false;
         }
 
+        public bool IsValidMovePublic(int row, int col, CellState player)
+        {
+            return (!IsValidPosition(row, col) || Board[row][col].CellState != CellState.Empty ||
+                    !IsValidMove(row, col, player));
+        }
         public void MakeMove(int row, int col, CellState player)
         {
-            if (!IsValidPosition(row, col) || Board[row][col].CellState != CellState.Empty || !IsValidMove(row, col, player))
-                throw new InvalidOperationException("Invalid move.");
-
+            if (IsValidMovePublic(row, col, player))
+            {
+                throw new Exception("how?");
+            }
             Board[row][col].CellState = player;
             FlipOpponentPieces(row, col, player);
         }

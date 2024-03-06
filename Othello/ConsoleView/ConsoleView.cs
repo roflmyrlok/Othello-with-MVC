@@ -1,10 +1,11 @@
-﻿using Model;
+﻿using AppModel;
+using Model;
 
 namespace ConsoleView;
 
-public class ConsoleView : IView
+public class ConsoleView : IViewApp
 {
-	public void ShowChange(GameBoard gameBoard)
+	public void ShowChange(GameBoard gameBoard, CellState currentPlayer)
 	{
 		Console.WriteLine("==========================");
 		foreach (var collumn in gameBoard.Board)
@@ -31,14 +32,10 @@ public class ConsoleView : IView
 			
 		}
 		Console.WriteLine("==========================");
+		Console.WriteLine(currentPlayer + "'s move");
 	}
 
-	public void ShowInputError(string inputError)
-	{
-		Console.WriteLine(inputError);
-	}
-
-	public void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask)
+	public void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask,  CellState currentPlayer)
 	{
 		Console.WriteLine(" |=a==b==c==d==e==f==g==h=|");
 		var rowN = 1;
@@ -72,5 +69,31 @@ public class ConsoleView : IView
 			
 		}
 		Console.WriteLine(" ==========================");
+		Console.WriteLine(currentPlayer + "'s move");
+	}
+
+	public void ShowEventCellOccupied( CellState currentPlayer)
+	{
+		Console.WriteLine("occupied by:" + currentPlayer.ToString());
+	}
+
+	public void ShowEventAiMoveComing(int row, string column)
+	{
+		Console.WriteLine("Ai move: " + row + column );
+	}
+
+	public void ShowEventTimerMoveComing(int row, string column)
+	{
+		Console.WriteLine("TIME OUT! RANDOM MOVE " + row + " " + column + " WAS MADE");
+	}
+
+	public void ShowEventCancel()
+	{
+		Console.WriteLine("Move canceled, restoring game");
+	}
+
+	public void ShowEventWin(CellState cellState)
+	{
+		Console.WriteLine("Winner:" + cellState);
 	}
 }
