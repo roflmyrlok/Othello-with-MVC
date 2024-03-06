@@ -1,3 +1,5 @@
+using AiOthelloModel;
+
 namespace Model;
 
 public class Game
@@ -12,6 +14,10 @@ public class Game
 	private Player _player2;
 	private Player _currentPlayer;
 	private bool _autoHint = true;
+	private List<string> _alphabet = new List<string>
+	{
+		"a","b","c","d","e","f","g","h","i","g","k"
+	};
 
 
 	public Game(IView gameView, IInputErrorNotifier errorNotifier)
@@ -21,10 +27,10 @@ public class Game
 		_errorNotifier = errorNotifier;
 	}
 	
-	public void SetUpNewPvPGame(string player1Colour = "white", string player2Colour = "black", int columns = 8, int rows = 8)
+	public void SetUpNewGame(string player1Colour = "white", string player2Colour = "black", int columns = 8, int rows = 8)
 	{
-		_player1 = new HumanPlayer(_playerColour.GetColourByName(player1Colour), CellState.Player1); 
-		_player2 = new HumanPlayer(_playerColour.GetColourByName(player2Colour), CellState.Player2);
+		_player1 = new Player(_playerColour.GetColourByName(player1Colour), CellState.Player1); 
+		_player2 = new Player(_playerColour.GetColourByName(player2Colour), CellState.Player2);
 		_currentGame = new GameBoard(rows, columns);
 		_currentPlayer = _player1;
 	}
@@ -53,6 +59,27 @@ public class Game
 		_currentGame.MakeMove(row, column, _currentPlayer.CurrentPlayerCellState);
 		_endTurn();
 	}
+	
+	public void MakeMoveWithAiAnswer(int columnR, int rowR)
+	{
+		var column = columnR - 1;
+		var row = rowR - 1;
+		_setAvailableMoves();
+		if (!_availabilityMask[row][column])
+		{ 
+			//tmp solution
+			_showError("move not available");
+			return;
+		}
+		_currentGame.MakeMove(row, column, _currentPlayer.CurrentPlayerCellState);
+		_endTurn();
+		Thread.Sleep(300);
+		_setAvailableMoves();
+		var tmp = Ai.DetermineBestMove((_currentGame, _availabilityMask));
+		_showError("ai move incoming " + (tmp.Item1 + 1) + " " + _alphabet[ tmp.Item2 + 1]);
+		MakeMove(tmp.Item2, tmp.Item1);
+		
+	}
 
 	public void Hint()
 	{
@@ -63,13 +90,13 @@ public class Game
 
 	private void _endTurn()
 	{
-		if (_currentPlayer == _player1)
+		if (_currentPlayer.CurrentPlayerCellState == _player1.CurrentPlayerCellState)
 		{
-			_currentPlayer = _player2;
+			_currentPlayer.CurrentPlayerCellState = _player2.CurrentPlayerCellState;
 		}
-		else if (_currentPlayer == _player2)
+		else if (_currentPlayer.CurrentPlayerCellState == _player2.CurrentPlayerCellState)
 		{
-			_currentPlayer = _player1;
+			_currentPlayer.CurrentPlayerCellState = _player1.CurrentPlayerCellState;
 		}
 		_view();
 		//tmp solution
@@ -79,6 +106,7 @@ public class Game
 	{
 		if (_autoHint)
 		{
+			_setAvailableMoves();
 			_showAvailableMoves();
 			return;
 		}
@@ -99,5 +127,10 @@ public class Game
 	private void _setAvailableMoves()
 	{
 		_availabilityMask = _currentGame.GetAvailableMoves(_currentPlayer.CurrentPlayerCellState);
+	}
+	public (GameBoard, List<List<bool>>) GetAiData()
+	{
+		_setAvailableMoves();
+		return (_currentGame, _availabilityMask);
 	}
 }

@@ -25,7 +25,7 @@ namespace Model
             }
         }
 
-        public List<List<bool>> GetAvailableMoves(CellState cellState)
+         public List<List<bool>> GetAvailableMoves(CellState currentPlayer)
         {
             var availableMoves = new List<List<bool>>();
 
@@ -50,7 +50,7 @@ namespace Model
                     if (cell.CellState == CellState.Empty)
                     {
                         // Check if placing a piece in this cell flips any opponent pieces
-                        if (IsValidMove(i, j, cellState))
+                        if (IsValidMove(i, j, currentPlayer))
                         {
                             availableMoves[i][j] = true; // Mark the cell as available
                         }
@@ -61,8 +61,8 @@ namespace Model
             return availableMoves;
         }
 
-        // Helper method to check if placing a piece in a cell flips any opponent pieces
-        private bool IsValidMove(int col, int row, CellState cellState)
+        // Helper method to check if placing a piece in a cell would flip any opponent pieces
+        private bool IsValidMove(int row, int col, CellState currentPlayer)
         {
             // Check in all eight directions
             int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
@@ -74,16 +74,16 @@ namespace Model
                 int y = col + dy[d];
 
                 // Skip if the adjacent cell is out of bounds or empty
-                if (x < 0 || x >= Columns || y < 0 || y >= Rows || Board[x][y].CellState == CellState.Empty)
+                if (x < 0 || x >= Columns || y < 0 || y >= Rows || Board[x][y].CellState == CellState.Empty || Board[x][y].CellState == currentPlayer)
                     continue;
 
                 // If the adjacent cell contains an opponent's piece, continue searching in this direction
-                if (Board[x][y].CellState != cellState)
+                if (Board[x][y].CellState != currentPlayer)
                 {
                     while (x >= 0 && x < Columns && y >= 0 && y < Rows && Board[x][y].CellState != CellState.Empty)
                     {
                         // If we find our own piece, this move is valid
-                        if (Board[x][y].CellState == cellState)
+                        if (Board[x][y].CellState == currentPlayer)
                             return true;
                         x += dx[d];
                         y += dy[d];
@@ -93,6 +93,8 @@ namespace Model
 
             return false;
         }
+
+        // Helper method to check if placing a piece in a cell flips any opponent pieces
         public void MakeMove(int row, int col, CellState player)
         {
             if (Board[row][col].CellState != CellState.Empty)
