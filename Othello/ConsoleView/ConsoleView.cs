@@ -42,32 +42,32 @@ public class ConsoleView : IView
 	{
 		Console.WriteLine(" |=a==b==c==d==e==f==g==h=|");
 		var rowN = 1;
-		foreach (var collumn in gameBoard.Board)
+		foreach (var row in gameBoard.Board)
 		{
-			var row = rowN.ToString() + "|";
+			var rowString = rowN.ToString() + "|";
 			rowN++;
-			foreach (var cell in collumn)
+			foreach (var cell in row)
 			{
 				switch (cell.CellState)
 				{
 					case CellState.Empty:
-						if (movesMask[cell.Column][cell.Row] == true)
+						if (movesMask[cell.Row][cell.Column])
 						{
-							row += " a ";
+							rowString += " a ";
 							break;
 						}
-						row += " 0 ";
+						rowString += " 0 ";
 						break;
 					case CellState.Player1:
-						row += " 1 ";
+						rowString += " 1 ";
 						break;
 					case CellState.Player2:
-						row += " 2 ";
+						rowString += " 2 ";
 						break;
 				}
 			}
-			row += "|";
-			Console.WriteLine(row);
+			rowString += "|";
+			Console.WriteLine(rowString);
 			
 			
 		}

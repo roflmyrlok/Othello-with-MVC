@@ -20,15 +20,13 @@ public static class Ai
 				}
 			}
 		}
-		var move = new Random().Next(1, upperLimit);
-		var col = 0;
+		var move = new Random(DateTime.Now.Millisecond).Next(1, upperLimit);
+		var raw = 0;
 		foreach (var liBo in am)
 		{
-			col += 1;
-			var raw = 0;
+			var col = 0;
 			foreach (var bo in liBo)
 			{
-				raw += 1;
 				if (bo)
 				{
 					move -= 1;
@@ -36,9 +34,11 @@ public static class Ai
 
 				if (move == 0)
 				{
-					return (col, raw);
+					return (raw, col);
 				}
+				col += 1;
 			}
+			raw += 1;
 		}
 
 		throw new Exception("no moves");

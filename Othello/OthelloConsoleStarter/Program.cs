@@ -10,20 +10,17 @@ var en = new ConsoleErrorNotifier();
 var c = new ConsoleController.ConsoleController(o, en);
 while (true)
 {
-	(int, int) arg; ;
+	(int, string) arg; ;
 	try
 	{
 		var input = Console.ReadLine();
-		var parser = new Input(input);
-		arg = parser.GetParsedInput();
+		arg = InputHandler.ParseInput(input);
 	}
 	catch (Exception e)
 	{
 		Console.WriteLine(e);
 		throw;
 	}
-	
-	
 	c.Act(arg);
 }
 

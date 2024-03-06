@@ -163,5 +163,42 @@ public class GameBoardTests
         // Assert that the winner is Empty, indicating a draw
         Assert.Equal(CellState.Empty, _gameBoard.CalculateWinner());
     }
+    
+    [Fact]
+    public void TestNotAvailableMovesForPlayer1()
+    {
+        // Make some moves to set up a scenario
+        _gameBoard.MakeMove(2, 3, CellState.Player1);
+        _gameBoard.MakeMove(2, 4, CellState.Player2);
+
+        // Get available moves for Player 1
+        var availableMoves = _gameBoard.GetAvailableMoves(CellState.Player1);
+        List<(int, int)> avaliableMovesTrue = new List<(int, int)>();
+        avaliableMovesTrue.Add(new (1,5));
+        avaliableMovesTrue.Add(new (2,5));
+        avaliableMovesTrue.Add(new (3,5));
+        avaliableMovesTrue.Add(new (4,5));
+        avaliableMovesTrue.Add(new (5,5));
+        // Assert specific cells should be available for Player 1
+        int rowCounter = 0;
+        foreach (var row in availableMoves)
+        {
+            int cellCounter = 0;
+            foreach (var cell in row)
+            {
+                if (!avaliableMovesTrue.Contains((rowCounter, cellCounter)))
+                {
+                    Assert.False(cell);
+                }
+                cellCounter++;
+            }
+            rowCounter++;
+        }
+        Assert.True(availableMoves[1][5]);
+        Assert.True(availableMoves[2][5]);
+        Assert.True(availableMoves[3][5]);
+        Assert.True(availableMoves[4][5]);
+        Assert.True(availableMoves[5][5]);
+    }
 
 }

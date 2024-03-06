@@ -1,19 +1,14 @@
 namespace ConsoleController;
 
-public class Input
+public static class InputHandler
 {
-	private List<string> _alphabet = new List<string>
-	{
-		"a","b","c","d","e","f","g","h","i","g","k"
-	};
 
-	private int column = 0;
-	private int row = 0;
-
-	public Input(string newInput)
+	public static (int, string) ParseInput(string newInput)
 	{
 		try
 		{
+			string column = "";
+			int row = 0;
 			var splittedInput = newInput.Split(" ");
 			var l = splittedInput.Length;
 			switch (l)
@@ -22,28 +17,16 @@ public class Input
 					foreach (var spl in splittedInput)
 					{
 						var lrow = 0;
-						if (!int.TryParse(spl,out lrow))
+						if (!int.TryParse(spl, out lrow))
 						{
-							column = 0;
-							while (true)
-							{
-								if (_alphabet[column] == spl)
-								{
-									break;
-								}
-								if (column >= _alphabet.Count - 1)
-								{
-									throw new Exception("aplphabet");
-								}
-								column += 1;
-							}
-							column += 1;
+							column = spl;
 						}
 						else
 						{
 							row = lrow;
 						}
 					}
+					return (row, column);
 					break;
 			}
 		}
@@ -52,15 +35,7 @@ public class Input
 			//Console.WriteLine(e);
 			throw new Exception("cannot process the input");
 		}
-		
-	}
 
-	public (int,int) GetParsedInput()
-	{
-		if (row == 0 || column == 0)
-		{
-			throw new Exception("cannot be 0");
-		}
-		return (column, row);
+		return (0, "");
 	}
 }
