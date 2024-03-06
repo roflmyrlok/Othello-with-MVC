@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Model;
+using AiOthelloModel;
 
 namespace ConsoleController;
 
@@ -9,17 +10,13 @@ public class ConsoleController
 
 	public void Act(object args)
 	{
-		var tmp = ((int, int)) args;
-		MakeMove(tmp);
+		var tmp = ((int, string)) args;
+		_game.MakeMove(tmp.Item1, tmp.Item2);
 	}
-	public ConsoleController(IView iobs, IInputErrorNotifier ierrN)
+
+	public ConsoleController(IView iobs, IInputErrorNotifier ierrN, bool bot = true, bool hint = true)
 	{
 		_game = new Game(iobs, ierrN);
-		_game.SetUpNewPvPGame();
-		_game.Start();
-	}
-	private void MakeMove((int,int) t)
-	{
-		_game.MakeMove(t.Item1, t.Item2);
+		_game.SetUpNewGame(bot, hint);
 	}
 }
