@@ -1,9 +1,10 @@
-namespace Model;
+using Model;
 
-public interface IView
+namespace AppModel;
+
+public interface IViewApp
 {
 	void ShowChange(GameBoard gameBoard);
 	void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask);
-	
-	
+	void ShowEventCellOccupied();
 }

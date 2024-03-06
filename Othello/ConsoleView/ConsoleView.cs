@@ -1,8 +1,9 @@
-﻿using Model;
+﻿using AppModel;
+using Model;
 
 namespace ConsoleView;
 
-public class ConsoleView : IView
+public class ConsoleView : IViewApp
 {
 	public void ShowChange(GameBoard gameBoard)
 	{
@@ -72,5 +73,10 @@ public class ConsoleView : IView
 			
 		}
 		Console.WriteLine(" ==========================");
+	}
+
+	public void ShowEventCellOccupied()
+	{
+		Console.WriteLine("occupied");
 	}
 }

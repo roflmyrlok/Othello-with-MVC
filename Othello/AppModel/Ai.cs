@@ -6,9 +6,8 @@ namespace AiOthelloModel;
 
 public static class Ai
 {
-	public static (int, int) DetermineBestMove((GameBoard, List<List<bool>>) tuple)
+	public static (int, int) DetermineBestMove(GameBoard gameBoard, List<List<bool>> am)
 	{
-		var am = tuple.Item2;
 		var upperLimit = 0;
 		foreach (var liBo in am)
 		{

@@ -1,22 +1,41 @@
 ﻿using System.Data;
-using Model;
+using AppModel;
 using AiOthelloModel;
 
 namespace ConsoleController;
 
 public class ConsoleController
 {
-	private Game _game;
+	private AppFlow _app;
 
-	public void Act(object args)
+	public ConsoleController(IViewApp viewApp)
 	{
-		var tmp = ((int, string)) args;
-		_game.MakeMove(tmp.Item1, tmp.Item2);
+		_app = new AppFlow(viewApp);
 	}
 
-	public ConsoleController(IView iobs, IInputErrorNotifier ierrN, bool bot = true, bool hint = true)
+	public void Start()
 	{
-		_game = new Game(iobs, ierrN);
-		_game.SetUpNewGame(bot, hint);
+		_app.StartNewGame("pudge", true, true, true);
+		while (true)
+		{
+			(int, string) arg; ;
+			try
+			{
+				var input = Console.ReadLine();
+				arg = InputHandler.ParseInput(input);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+			PassMove(arg);
+		}
+	}
+	
+	private void PassMove(object args)
+	{
+		var tmp = ((int, string)) args;
+		_app.MakeMoveInCurrentGame(tmp.Item1, tmp.Item2);
 	}
 }
