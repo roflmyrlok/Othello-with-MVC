@@ -16,7 +16,7 @@ public class ConsoleView : IViewApp
 				switch (cell.CellState)
 				{
 					case CellState.Empty:
-						row += " 0 ";
+						row += " _ ";
 						break;
 					case CellState.Player1:
 						row += " 1 ";
@@ -53,7 +53,7 @@ public class ConsoleView : IViewApp
 							rowString += " a ";
 							break;
 						}
-						rowString += " 0 ";
+						rowString += " _ ";
 						break;
 					case CellState.Player1:
 						rowString += " 1 ";

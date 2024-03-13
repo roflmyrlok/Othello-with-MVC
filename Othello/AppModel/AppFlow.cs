@@ -13,9 +13,9 @@ public class AppFlow : IAppControl, IView
 	private IViewApp _viewApp;
 	private Game _currentGame;
 	private Config _currentConfig;
-	private Game _currentGameSave;
 	private DateTime _lastMoveDateTime;
 	private Timer _moveTimer = new Timer(20000);
+	private List<(int, int)> _moves = new List<(int, int)>();
 
 	public AppFlow(IViewApp viewApp)
 	{
@@ -28,13 +28,13 @@ public class AppFlow : IAppControl, IView
 		_gameConfigs.Add(newGame, new Config(autoHint, vsBot, timer));
 		_currentGame = newGame;
 		_currentConfig = _gameConfigs[_currentGame];
-		_currentGameSave = (Game)_currentGame.Clone();
 		_currentGame.SetUpNewGame();
+		_viewApp.ShowAvailableMoves(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData(), _currentGame._currentPlayer.CurrentPlayerCellState);
+
 	}
 
 	public void MakeMoveInCurrentGame(int row, string column)
 	{
-		var tmpSave = _currentGame.Clone();
 		var internalColumn = BoardCoordinatesInternalTranslator.ConvertLetterToNumber(column) - 1;
 		var internalRow = row - 1;
 		if (_currentConfig.IsBot())
@@ -50,7 +50,7 @@ public class AppFlow : IAppControl, IView
 		{
 			_currentGame.MakeMove(internalRow, internalColumn);
 		}
-		_currentGameSave = (Game)tmpSave;
+		_moves.Add(new (internalRow, internalColumn));
 		_lastMoveDateTime = DateTime.Now;
 		if (_currentConfig.IsTimer())
 		{
@@ -68,7 +68,7 @@ public class AppFlow : IAppControl, IView
 		var move = Ai.DetermineBestMove(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData());
 		_viewApp.ShowEventTimerMoveComing(move.Item1 + 1, BoardCoordinatesInternalTranslator.ConvertNumberToLetter(move.Item2 + 1));
 		MakeMoveInCurrentGame(move.Item1 + 1, BoardCoordinatesInternalTranslator.ConvertNumberToLetter(move.Item2 + 1));
-		_currentGameSave = _currentGame;
+		_moves.Add(new (move.Item1, move.Item2));
 		_lastMoveDateTime = DateTime.Now;
 		_moveTimer.Stop();
 	}
@@ -76,15 +76,22 @@ public class AppFlow : IAppControl, IView
 	public void CancelLastMove()
 	{
 		_viewApp.ShowEventCancel();
-		if (_currentConfig.IsTimer())
-		{
 			if (_lastMoveDateTime.Date.AddSeconds(3) <= DateTime.Now)
 			{
-				_currentGame = _currentGameSave;
+				var newGame = new Game(this);
+				_currentGame = newGame;
+				_currentGame.SetUpNewGame();
+				for (int i = 0; i < _moves.Count - 1; i++)
+				{
+					_currentGame.MakeMove(_moves[i].Item1, _moves[i].Item2, true);
+				}
 			}
+			_moves = _moves[..^1];
+			_viewApp.ShowAvailableMoves(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData(), _currentGame._currentPlayer.CurrentPlayerCellState);
 			return;
-		}
-		_currentGame = _currentGameSave;
+		
+		
+		
 	}
 
 	public void GetHint()
@@ -96,7 +103,6 @@ public class AppFlow : IAppControl, IView
 	{
 		_currentGame = _availableGames[gameName];
 		_currentConfig = _gameConfigs[_currentGame];
-		_currentGameSave = (Game)_currentGame.Clone();
 		_lastMoveDateTime = DateTime.Now;
 	}
 
@@ -118,7 +124,7 @@ public class AppFlow : IAppControl, IView
 	public void ShowEventCellOccupied(CellState currentPlayer)
 	{
 		_viewApp.ShowEventCellOccupied(currentPlayer);
-		throw new Exception("cell ocupied");
+		throw new Exception("cell occupied");
 	}
 
 	public void ShowEventWinCondition(CellState currentPlayer)

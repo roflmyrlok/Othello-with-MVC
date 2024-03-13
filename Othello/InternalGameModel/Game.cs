@@ -5,7 +5,7 @@ public class Game : IInteractive
 	private readonly IView _gameView;
 	private List<List<bool>> _availabilityMask = new List<List<bool>>();
 	private GameBoard _currentGame;
-	private Player _currentPlayer;
+	public Player _currentPlayer;
 
 
 	public Game(IView gameView)
@@ -17,10 +17,9 @@ public class Game : IInteractive
 	{
 		_currentGame = new GameBoard(rows, columns);
 		_currentPlayer = new Player( CellState.Player1);
-		_view();
 	}
 	
-	public void MakeMove(int row, int column)
+	public void MakeMove(int row, int column, bool invisible = false)
 	{
 		_setAvailableMoves();
 		if (_currentGame.IsValidMovePublic(row, column, _currentPlayer.CurrentPlayerCellState))
@@ -30,6 +29,10 @@ public class Game : IInteractive
 		}
 		_currentGame.MakeMove(row, column, _currentPlayer.CurrentPlayerCellState);
 		_endTurn();
+		if (invisible)
+		{
+			return;
+		}
 		_view();
 	}
 	
@@ -77,10 +80,6 @@ public class Game : IInteractive
 	{
 		_setAvailableMoves();
 		return _availabilityMask;
-	}
-	public object Clone()
-	{
-		return this.MemberwiseClone();
 	}
 
 	public void GetHint()
