@@ -1,5 +1,4 @@
-﻿using AiOthelloModel;
-using AppModel;
+﻿using AppModel;
 
 namespace ConsoleController;
 
@@ -7,9 +6,9 @@ public class ConsoleController
 {
 	private AppFlow _app;
 
-	public ConsoleController(IViewApp viewApp)
+	public ConsoleController(AppFlow appFlow)
 	{
-		_app = new AppFlow(viewApp, new Ai(), new BoardCoordinatesInternalTranslator());
+		_app = appFlow;
 	}
 
 	public void Start()
@@ -100,7 +99,7 @@ public class ConsoleController
 	
 	private void NewGame(string name, bool hint, bool bot, bool timer)
 	{
-		_app.StartNewGame(name, hint, bot, timer);
+		_app.SetNewGame(name, hint, bot, timer);
 	}
 
 	private void Hint()

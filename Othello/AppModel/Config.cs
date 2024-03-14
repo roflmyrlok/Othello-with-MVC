@@ -1,29 +1,20 @@
+using Model;
+
 namespace AppModel;
 
 public class Config
 {
-	private bool _autoHint = true;
-	private bool _botOpponent = true;
-	private bool _timer = true;
+	public bool AutoHint;
+	public bool BotOpponent;
+	public bool Timer;
+	public List<(int, int)> CurrentGameMoves { get; set; } = new List<(int, int)>();
+	public bool Win = false;
+	public CellState WCellState;
 
-	public Config(bool autoHint, bool botOpponent, bool timer)
+	public Config(bool autoHint = true, bool botOpponent = false, bool timer = false)
 	{
-		_timer = timer;
-		_autoHint = autoHint;
-		_botOpponent = botOpponent;
-	}
-	public bool IsBot()
-	{
-		return _botOpponent;
-	}
-
-	public bool IsHint()
-	{
-		return _autoHint;
-	}
-
-	public bool IsTimer()
-	{
-		return _timer;
+		Timer = timer;
+		AutoHint = autoHint;
+		BotOpponent = botOpponent;
 	}
 }

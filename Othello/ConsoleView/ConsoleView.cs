@@ -96,4 +96,14 @@ public class ConsoleView : IViewApp
 	{
 		Console.WriteLine("Winner:" + cellState);
 	}
+
+	public void ShowEventCannotRestoreMove()
+	{
+		Console.WriteLine("Cannot restore move");
+	}
+
+	public void ShowEventInputDuringBotMove()
+	{
+		Console.WriteLine("Cannot move while bot is thinking");
+	}
 }
