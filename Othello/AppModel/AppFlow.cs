@@ -98,7 +98,7 @@ public class AppFlow : IAppControl, IView
 
 	public void GetHint()
 	{
-		_currentGame.GetHint();
+		_currentGame.ShowAvailableMoves();
 	}
 
 	public void PickNewGame(string gameName)
