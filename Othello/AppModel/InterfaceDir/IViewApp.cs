@@ -11,6 +11,6 @@ public interface IViewApp
 	void ShowEventTimerMoveComing(int row, string column);
 	void ShowEventCancel(); 
 	void ShowEventWin(CellState cellState);
-	void ShowEventCannotRestoreMove();
+	void ShowEventCannotCancelMove();
 	void ShowEventInputDuringBotMove();
 }

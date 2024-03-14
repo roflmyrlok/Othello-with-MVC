@@ -97,7 +97,7 @@ public class ConsoleView : IViewApp
 		Console.WriteLine("Winner:" + cellState);
 	}
 
-	public void ShowEventCannotRestoreMove()
+	public void ShowEventCannotCancelMove()
 	{
 		Console.WriteLine("Cannot restore move");
 	}

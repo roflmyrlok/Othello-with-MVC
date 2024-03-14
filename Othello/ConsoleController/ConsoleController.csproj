@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\AppModel\AppModel.csproj" />
       <ProjectReference Include="..\InternalGameModel\InternalGameModel.csproj" />
+      <ProjectReference Include="..\ServicesForAppModel\ServicesForAppModel.csproj" />
     </ItemGroup>
 
 </Project>
