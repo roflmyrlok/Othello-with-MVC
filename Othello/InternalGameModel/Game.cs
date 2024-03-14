@@ -1,6 +1,6 @@
 namespace Model;
 
-public class Game : IInteractive
+public class Game : IInteractive, IProvideData
 {
 	private readonly IView _gameView;
 	private List<List<bool>> _availabilityMask = new List<List<bool>>();
@@ -28,7 +28,7 @@ public class Game : IInteractive
 		{
 			return;
 		}
-		_view();
+		View();
 	}
 	
 	private void _endTurn()
@@ -50,12 +50,12 @@ public class Game : IInteractive
 		_gameView.ShowEventWinCondition(_currentGame.CalculateWinner());
 		
 	}
-	private void _view()
+	public void View()
 	{
 		_gameView.ShowChange(_currentGame, CurrentPlayer.CurrentPlayerCellState);
 	}
 
-	private void _showAvailableMoves()
+	public void ShowAvailableMoves()
 	{
 		_setAvailableMoves();
 		_gameView.ShowAvailableMoves(_currentGame, _availabilityMask, CurrentPlayer.CurrentPlayerCellState);
@@ -75,10 +75,5 @@ public class Game : IInteractive
 	{
 		_setAvailableMoves();
 		return _availabilityMask;
-	}
-
-	public void GetHint()
-	{
-		_setAvailableMoves();
 	}
 }
