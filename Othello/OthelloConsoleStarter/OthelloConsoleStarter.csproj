@@ -11,6 +11,7 @@
       <ProjectReference Include="..\ConsoleController\ConsoleController.csproj" />
       <ProjectReference Include="..\ConsoleView\ConsoleView.csproj" />
       <ProjectReference Include="..\InternalGameModel\InternalGameModel.csproj" />
+      <ProjectReference Include="..\ServicesForAppModel\ServicesForAppModel.csproj" />
     </ItemGroup>
 
 </Project>
