@@ -5,29 +5,24 @@ public class Game : IInteractive
 	private readonly IView _gameView;
 	private List<List<bool>> _availabilityMask = new List<List<bool>>();
 	private GameBoard _currentGame;
-	public Player _currentPlayer;
-
-
-	public Game(IView gameView)
+	public Player CurrentPlayer {  get; private set;  }
+	
+	public Game(IView gameView, int columns = 8, int rows = 8)
 	{
 		_gameView = gameView;
-	}
-	
-	public void SetUpNewGame(int columns = 8, int rows = 8)
-	{
 		_currentGame = new GameBoard(rows, columns);
-		_currentPlayer = new Player( CellState.Player1);
+		CurrentPlayer = new Player( CellState.Player1);
 	}
 	
 	public void MakeMove(int row, int column, bool invisible = false)
 	{
 		_setAvailableMoves();
-		if (_currentGame.IsValidMovePublic(row, column, _currentPlayer.CurrentPlayerCellState))
+		if (_currentGame.IsValidMovePublic(row, column, CurrentPlayer.CurrentPlayerCellState))
 		{ 
-			_gameView.ShowEventCellOccupied(_currentPlayer.CurrentPlayerCellState);
+			_gameView.ShowEventCellOccupied(CurrentPlayer.CurrentPlayerCellState);
 			return;
 		}
-		_currentGame.MakeMove(row, column, _currentPlayer.CurrentPlayerCellState);
+		_currentGame.MakeMove(row, column, CurrentPlayer.CurrentPlayerCellState);
 		_endTurn();
 		if (invisible)
 		{
@@ -39,16 +34,16 @@ public class Game : IInteractive
 	private void _endTurn()
 	{
 		
-		if (_currentPlayer.CurrentPlayerCellState == CellState.Player1)
+		if (CurrentPlayer.CurrentPlayerCellState == CellState.Player1)
 		{
-			_currentPlayer.CurrentPlayerCellState = CellState.Player2;
+			CurrentPlayer.CurrentPlayerCellState = CellState.Player2;
 		}
-		else if (_currentPlayer.CurrentPlayerCellState == CellState.Player2)
+		else if (CurrentPlayer.CurrentPlayerCellState == CellState.Player2)
 		{
-			_currentPlayer.CurrentPlayerCellState = CellState.Player1;
+			CurrentPlayer.CurrentPlayerCellState = CellState.Player1;
 		}
 
-		if (_currentGame.AnyMovesAvailable(_currentPlayer.CurrentPlayerCellState))
+		if (_currentGame.AnyMovesAvailable(CurrentPlayer.CurrentPlayerCellState))
 		{
 			return;
 		}
@@ -57,18 +52,18 @@ public class Game : IInteractive
 	}
 	private void _view()
 	{
-		_gameView.ShowChange(_currentGame, _currentPlayer.CurrentPlayerCellState);
+		_gameView.ShowChange(_currentGame, CurrentPlayer.CurrentPlayerCellState);
 	}
 
 	private void _showAvailableMoves()
 	{
 		_setAvailableMoves();
-		_gameView.ShowAvailableMoves(_currentGame, _availabilityMask, _currentPlayer.CurrentPlayerCellState);
+		_gameView.ShowAvailableMoves(_currentGame, _availabilityMask, CurrentPlayer.CurrentPlayerCellState);
 	}
 
 	private void _setAvailableMoves()
 	{
-		_availabilityMask = _currentGame.GetAvailableMoves(_currentPlayer.CurrentPlayerCellState);
+		_availabilityMask = _currentGame.GetAvailableMoves(CurrentPlayer.CurrentPlayerCellState);
 	}
 
 	public GameBoard GetGameBoardData()

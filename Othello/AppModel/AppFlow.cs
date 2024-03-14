@@ -11,15 +11,19 @@ public class AppFlow : IAppControl, IView
 	private Dictionary<string, Game> _availableGames = new Dictionary<string, Game>();
 	private Dictionary<Game, Config> _gameConfigs = new Dictionary<Game, Config>();
 	private IViewApp _viewApp;
+	private IMoveProvider _moveProvider;
+	private ICoordinatesTranslator _coordinatesTranslator;
 	private Game _currentGame;
 	private Config _currentConfig;
 	private DateTime _lastMoveDateTime;
 	private Timer _moveTimer = new Timer(20000);
 	private List<(int, int)> _moves = new List<(int, int)>();
 
-	public AppFlow(IViewApp viewApp)
+	public AppFlow(IViewApp viewApp, IMoveProvider moveProvider, ICoordinatesTranslator coordinatesTranslator)
 	{
 		_viewApp = viewApp;
+		_moveProvider = moveProvider;
+		_coordinatesTranslator = coordinatesTranslator;
 	}
 	public void StartNewGame(string gameName, bool autoHint, bool vsBot, bool timer)
 	{
@@ -28,21 +32,20 @@ public class AppFlow : IAppControl, IView
 		_gameConfigs.Add(newGame, new Config(autoHint, vsBot, timer));
 		_currentGame = newGame;
 		_currentConfig = _gameConfigs[_currentGame];
-		_currentGame.SetUpNewGame();
-		_viewApp.ShowAvailableMoves(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData(), _currentGame._currentPlayer.CurrentPlayerCellState);
+		_viewApp.ShowAvailableMoves(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData(), _currentGame.CurrentPlayer.CurrentPlayerCellState);
 
 	}
 
 	public void MakeMoveInCurrentGame(int row, string column)
 	{
-		var internalColumn = BoardCoordinatesInternalTranslator.ConvertLetterToNumber(column) - 1;
+		var internalColumn = _coordinatesTranslator.ConvertLetterToNumber(column) - 1;
 		var internalRow = row - 1;
 		if (_currentConfig.IsBot())
 		{
 			_currentGame.MakeMove(internalRow, internalColumn);
-			var move = Ai.DetermineBestMove(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData());
+			var move = _moveProvider.DetermineBestMove(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData());
 			Thread.Sleep(new Random(DateTime.Now.Millisecond).Next(1400, 2300));
-			_viewApp.ShowEventAiMoveComing(move.Item1 + 1, BoardCoordinatesInternalTranslator.ConvertNumberToLetter(move.Item2 + 1));
+			_viewApp.ShowEventAiMoveComing(move.Item1 + 1, _coordinatesTranslator.ConvertNumberToLetter(move.Item2 + 1));
 			Thread.Sleep(new Random(DateTime.Now.Millisecond).Next(2000, 3000));
 			_currentGame.MakeMove(move.Item1, move.Item2);
 		}
@@ -65,9 +68,9 @@ public class AppFlow : IAppControl, IView
 
 	private void MakeMoveOnTimer(object sender, ElapsedEventArgs e)
 	{
-		var move = Ai.DetermineBestMove(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData());
-		_viewApp.ShowEventTimerMoveComing(move.Item1 + 1, BoardCoordinatesInternalTranslator.ConvertNumberToLetter(move.Item2 + 1));
-		MakeMoveInCurrentGame(move.Item1 + 1, BoardCoordinatesInternalTranslator.ConvertNumberToLetter(move.Item2 + 1));
+		var move = _moveProvider.DetermineBestMove(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData());
+		_viewApp.ShowEventTimerMoveComing(move.Item1 + 1, _coordinatesTranslator.ConvertNumberToLetter(move.Item2 + 1));
+		MakeMoveInCurrentGame(move.Item1 + 1, _coordinatesTranslator.ConvertNumberToLetter(move.Item2 + 1));
 		_moves.Add(new (move.Item1, move.Item2));
 		_lastMoveDateTime = DateTime.Now;
 		_moveTimer.Stop();
@@ -80,14 +83,13 @@ public class AppFlow : IAppControl, IView
 			{
 				var newGame = new Game(this);
 				_currentGame = newGame;
-				_currentGame.SetUpNewGame();
 				for (int i = 0; i < _moves.Count - 1; i++)
 				{
 					_currentGame.MakeMove(_moves[i].Item1, _moves[i].Item2, true);
 				}
 			}
 			_moves = _moves[..^1];
-			_viewApp.ShowAvailableMoves(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData(), _currentGame._currentPlayer.CurrentPlayerCellState);
+			_viewApp.ShowAvailableMoves(_currentGame.GetGameBoardData(), _currentGame.GetAvailableMovesData(), _currentGame.CurrentPlayer.CurrentPlayerCellState);
 			return;
 		
 		

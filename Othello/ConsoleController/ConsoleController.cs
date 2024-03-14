@@ -1,4 +1,5 @@
-﻿using AppModel;
+﻿using AiOthelloModel;
+using AppModel;
 
 namespace ConsoleController;
 
@@ -8,7 +9,7 @@ public class ConsoleController
 
 	public ConsoleController(IViewApp viewApp)
 	{
-		_app = new AppFlow(viewApp);
+		_app = new AppFlow(viewApp, new Ai(), new BoardCoordinatesInternalTranslator());
 	}
 
 	public void Start()
