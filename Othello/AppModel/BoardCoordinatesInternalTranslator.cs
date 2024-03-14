@@ -1,8 +1,10 @@
+using AppModel;
+
 namespace ConsoleController;
 
-public static class BoardCoordinatesInternalTranslator
+public class BoardCoordinatesInternalTranslator : ICoordinatesTranslator
 { 
-	public static string ConvertNumberToLetter(int number)
+	public string ConvertNumberToLetter(int number)
 	{
 		List<string> alphabet = new List<string> {"a","b","c","d","e","f","g","h","i","g","k"};
 		if (number <= alphabet.Count - 1)
@@ -11,7 +13,7 @@ public static class BoardCoordinatesInternalTranslator
 		}
 		throw new Exception("number cringe");
 	}
-	public static int ConvertLetterToNumber(string letter)
+	public int ConvertLetterToNumber(string letter)
 	{
 		List<string> alphabet = new List<string> {"a","b","c","d","e","f","g","h","i","g","k"};
 		var i = 1;

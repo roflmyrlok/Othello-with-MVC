@@ -1,12 +1,13 @@
 ﻿using System.Security.Cryptography;
+using AppModel;
 using Model;
 
 namespace AiOthelloModel;
 
 
-public static class Ai
+public class Ai : IMoveProvider
 {
-	public static (int, int) DetermineBestMove(GameBoard gameBoard, List<List<bool>> am)
+	public (int, int) DetermineBestMove(GameBoard gameBoard, List<List<bool>> am)
 	{
 		var upperLimit = 0;
 		foreach (var liBo in am)
