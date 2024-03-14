@@ -4,22 +4,10 @@ using Timer = System.Timers.Timer;
 
 namespace AppModel;
 
-public class AppFlowStd : IAppControl, IView
+public class AppFlowPvP : AppFlow
 {
-	protected readonly IViewApp ViewApp;
-	protected readonly IMoveProvider MoveProvider;
-	protected readonly ICoordinatesTranslator CoordinatesTranslator;
-	protected Game CurrentGame;
-	protected Config CurrentConfig;
-	protected DateTime LastMoveDateTime;
-	protected Timer AutoMoveOnTimer;
-	protected List<(int, int)> CurrentGameMoves = new List<(int, int)>();
-
-	public AppFlowStd(IViewApp viewApp, IMoveProvider moveProvider, ICoordinatesTranslator coordinatesTranslator)
+	public AppFlowPvP(IViewApp viewApp, IMoveProvider moveProvider, ICoordinatesTranslator coordinatesTranslator) : base(viewApp, moveProvider, coordinatesTranslator)
 	{
-		ViewApp = viewApp;
-		MoveProvider = moveProvider;
-		CoordinatesTranslator = coordinatesTranslator;
 		CurrentGame = new Game(this);
 		CurrentConfig = new Config();
 		AutoMoveOnTimer	= new Timer(20000);
@@ -38,15 +26,7 @@ public class AppFlowStd : IAppControl, IView
 		AutoMoveOnTimer.Elapsed += MakeAutoMoveOnOnTimer;
 	}
 
-	public void SetNewGame(bool autoHint, bool timer)
-	{
-		var newGame = new Game(this);
-		CurrentGame = newGame;
-		CurrentConfig = new Config(autoHint, timer);
-		ViewApp.ShowAvailableMoves(CurrentGame.GetGameBoardData(), CurrentGame.GetAvailableMovesData(), CurrentGame.CurrentPlayer.CurrentPlayerCellState);
-	}
-
-	public virtual void MakeMoveInCurrentGame(int row, string column)
+	public override void MakeMoveInCurrentGame(int row, string column)
 	{
 		if (CurrentConfig.Win)
 		{
@@ -68,17 +48,18 @@ public class AppFlowStd : IAppControl, IView
 		}
 		
 	}
-	protected void MakeAutoMoveOnOnTimer(object? sender, ElapsedEventArgs e)
+	protected override void MakeAutoMoveOnOnTimer(object? sender, ElapsedEventArgs e)
 	{
 		AutoMoveOnTimer.Dispose();
 		var responseMove =
 			MoveProvider.DetermineBestMove(CurrentGame.GetGameBoardData(), CurrentGame.GetAvailableMovesData());
 		ViewApp.ShowEventTimerMoveComing(responseMove.Item1, CoordinatesTranslator.ConvertNumberToLetter(responseMove.Item2));
 		CurrentGame.MakeMove(responseMove.Item1, responseMove.Item2);
+		CurrentGameMoves.Add(responseMove);
 		LastMoveDateTime = DateTime.Now.AddSeconds(-3);  // cannot cancel auto move
 	}
 
-	public virtual void CancelLastMove()
+	public override void CancelLastMove()
 	{
 		if (LastMoveDateTime.AddSeconds(3) < DateTime.Now)
 		{
@@ -109,38 +90,5 @@ public class AppFlowStd : IAppControl, IView
 		CurrentGameMoves = CurrentGameMoves[..^1];
 		ViewApp.ShowAvailableMoves(CurrentGame.GetGameBoardData(), CurrentGame.GetAvailableMovesData(), CurrentGame.CurrentPlayer.CurrentPlayerCellState);
 		LastMoveDateTime = DateTime.Now.AddSeconds(-3); // cannot cancel more moves
-	}
-
-	public void GetHint()
-	{
-		CurrentGame.ShowAvailableMoves();
-	}
-
-	public void ShowChange(GameBoard gameBoard, CellState currentPlayer)
-	{
-		if (CurrentConfig.AutoHint)
-		{
-			ShowAvailableMoves(gameBoard, CurrentGame.GetAvailableMovesData(), currentPlayer);
-			return;
-		}
-		ViewApp.ShowChange(gameBoard, currentPlayer);
-	}
-
-	public void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask, CellState currentPlayer)
-	{
-		ViewApp.ShowAvailableMoves(gameBoard, movesMask, currentPlayer);
-	}
-
-	public void ShowEventCellOccupied(CellState currentPlayer)
-	{
-		ViewApp.ShowEventCellOccupied(currentPlayer);
-		throw new Exception("cell occupied");
-	}
-
-	public void ShowEventWinCondition(CellState currentPlayer)
-	{
-		ViewApp.ShowEventWin(currentPlayer);
-		CurrentConfig.Win = true;
-		CurrentConfig.WCellState = currentPlayer;
 	}
 }

@@ -5,7 +5,7 @@ namespace ConsoleController;
 
 public class ConsoleController
 {
-	private AppFlowStd _app;
+	private AppFlow _app;
 	private IViewApp _viewApp;
 
 	public ConsoleController(IViewApp viewApp)
@@ -87,7 +87,7 @@ public class ConsoleController
 	
 	private void NewGame(bool hint, bool bot, bool timer)
 	{
-		_app = bot ? new AppFlowAgainstBot(_viewApp, new Ai(), new BoardCoordinatesInternalTranslator()) : new AppFlowStd(_viewApp, new Ai(), new BoardCoordinatesInternalTranslator());
+		_app = bot ? new AppFlowPvE(_viewApp, new Ai(), new BoardCoordinatesInternalTranslator()) : new AppFlowPvP(_viewApp, new Ai(), new BoardCoordinatesInternalTranslator());
 		_app.SetNewGame(hint, timer);
 	}
 

@@ -1,14 +1,4 @@
-/*
 
-
-
-not rdy for use 
-
-
-
-
-*/
-/*
 using System.Timers;
 using Model;
 using Timer = System.Timers.Timer;
@@ -26,6 +16,19 @@ public abstract class AppFlow : IAppControl, IView
 	protected Timer AutoMoveOnTimer;
 	protected List<(int, int)> CurrentGameMoves = new List<(int, int)>();
 
+
+	protected AppFlow(IViewApp viewApp, IMoveProvider moveProvider, ICoordinatesTranslator coordinatesTranslator)
+	{
+		ViewApp = viewApp;
+		MoveProvider = moveProvider;
+		CoordinatesTranslator = coordinatesTranslator;
+		CurrentGame = new Game(this);
+		CurrentConfig = new Config();
+		AutoMoveOnTimer	= new Timer(20000);
+		AutoMoveOnTimer.AutoReset = false;
+		AutoMoveOnTimer.Disposed += StopAutoTurnTimerAfterAutoTurnMove;
+		AutoMoveOnTimer.Elapsed += MakeAutoMoveOnOnTimer;
+	}
 
 	private void StopAutoTurnTimerAfterAutoTurnMove(object? sender, EventArgs e)
 	{
@@ -50,11 +53,15 @@ public abstract class AppFlow : IAppControl, IView
 
 	public abstract void CancelLastMove();
 
-	public void GetHint()
-	{
-		CurrentGame.ShowAvailableMoves();
-	}
+	
 
+	
+	
+	
+	
+	
+	
+	// IView Implementation can be moved in separate class?
 	public void ShowChange(GameBoard gameBoard, CellState currentPlayer)
 	{
 		if (CurrentConfig.AutoHint)
@@ -73,6 +80,7 @@ public abstract class AppFlow : IAppControl, IView
 	public void ShowEventCellOccupied(CellState currentPlayer)
 	{
 		ViewApp.ShowEventCellOccupied(currentPlayer);
+		CurrentGame.View();
 		throw new Exception("cell occupied");
 	}
 
@@ -82,4 +90,9 @@ public abstract class AppFlow : IAppControl, IView
 		CurrentConfig.Win = true;
 		CurrentConfig.WCellState = currentPlayer;
 	}
-}*/
+	
+	public void GetHint()
+	{
+		CurrentGame.ShowAvailableMoves();
+	}
+}
