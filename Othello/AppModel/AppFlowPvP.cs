@@ -28,6 +28,14 @@ public class AppFlowPvP : AppFlow
 
 	public override void MakeMoveInCurrentGame(int row, string column)
 	{
+		lock (Lock) // Lock critical section
+		{
+			if (CurrentConfig.Timer && AutoMoveOnTimer.Enabled)
+			{
+				Locked = true;
+			}		
+		}
+
 		if (CurrentConfig.Win)
 		{
 			ViewApp.ShowEventWin(CurrentConfig.WCellState);
@@ -39,10 +47,11 @@ public class AppFlowPvP : AppFlow
 		CurrentGame.MakeMove(internalRow, internalColumn);
 		CurrentGameMoves.Add((internalRow, internalColumn));
 		LastMoveDateTime = DateTime.Now;
-
-		if (CurrentConfig.Timer)
+		
+		if (CurrentConfig.Timer && AutoMoveOnTimer.Enabled)
 		{
 			AutoMoveOnTimer.Dispose();
+			Locked = false;
 			LastMoveDateTime = DateTime.Now;
 			AutoMoveOnTimer.Start();
 		}
@@ -61,6 +70,13 @@ public class AppFlowPvP : AppFlow
 
 	public override void CancelLastMove()
 	{
+		lock (Lock) // Lock critical section
+		{
+			if (CurrentConfig.Timer && AutoMoveOnTimer.Enabled)
+			{
+				Locked = true;
+			}		
+		}
 		if (LastMoveDateTime.AddSeconds(3) < DateTime.Now)
 		{
 			ViewApp.ShowEventCannotCancelMove();
@@ -68,11 +84,7 @@ public class AppFlowPvP : AppFlow
 			throw new Exception("cannot cancel");
 		}
 		ViewApp.ShowEventCancel();
-		if (CurrentConfig.Timer)
-		{
-			AutoMoveOnTimer.Dispose();
-			AutoMoveOnTimer.Start();
-		}
+		
 		var newGame = new Game(this);
 		CurrentGame = newGame;
 
@@ -90,5 +102,12 @@ public class AppFlowPvP : AppFlow
 		CurrentGameMoves = CurrentGameMoves[..^1];
 		ViewApp.ShowAvailableMoves(CurrentGame.GetGameBoardData(), CurrentGame.GetAvailableMovesData(), CurrentGame.CurrentPlayer.CurrentPlayerCellState);
 		LastMoveDateTime = DateTime.Now.AddSeconds(-3); // cannot cancel more moves
+		if (CurrentConfig.Timer && AutoMoveOnTimer.Enabled)
+		{
+			AutoMoveOnTimer.Dispose();
+			Locked = false;
+			LastMoveDateTime = DateTime.Now;
+			AutoMoveOnTimer.Start();
+		}
 	}
 }

@@ -26,6 +26,15 @@ public class AppFlowPvE : AppFlow
 
 	public override void MakeMoveInCurrentGame(int row, string column)
 	{
+		lock (Lock) // Lock critical section
+		{
+			if (CurrentConfig.Timer && AutoMoveOnTimer.Enabled)
+			{
+				Locked = true;
+			}
+			Locked = false;
+		}
+
 		if (CurrentConfig.Win)
 		{
 			ViewApp.ShowEventWin(CurrentConfig.WCellState);
@@ -66,11 +75,16 @@ public class AppFlowPvE : AppFlow
 
 	public override void CancelLastMove()
 	{
-		if (!_botMoveOnTimer.Enabled)
+		lock (Lock) // Lock critical section
 		{
-			ViewApp.ShowEventCannotCancelMove();
-			return;
+			if (!_botMoveOnTimer.Enabled)
+			{
+				ViewApp.ShowEventCannotCancelMove();
+				return;
+			}
+			Locked = true;
 		}
+
 		if (LastMoveDateTime.AddSeconds(3) < DateTime.Now)
 		{
 			ViewApp.ShowEventCannotCancelMove();
@@ -83,6 +97,11 @@ public class AppFlowPvE : AppFlow
 		}
 		_botMoveOnTimer.Stop();
 		_botMoveOnTimer.Dispose();
+		
+		lock (Lock)
+		{
+			Locked = false;
+		}
 		var newGame = new Game(this);
 		CurrentGame = newGame;
 		if (CurrentGameMoves.Count == 1)
@@ -107,6 +126,14 @@ public class AppFlowPvE : AppFlow
 		CurrentGame.MakeMove(row, column);
 		CurrentGameMoves.Add((row, column));
 		LastMoveDateTime = DateTime.Now;
+		if (CurrentConfig.Timer && AutoMoveOnTimer.Enabled)
+		{
+			AutoMoveOnTimer.Dispose();
+			lock (Lock)
+			{
+				Locked = false;
+			}
+		}
 		_botMoveOnTimer.Start();
 		
 	}

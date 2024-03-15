@@ -15,6 +15,8 @@ public abstract class AppFlow : IAppControl, IView
 	protected DateTime LastMoveDateTime;
 	protected Timer AutoMoveOnTimer;
 	protected List<(int, int)> CurrentGameMoves = new List<(int, int)>();
+	protected bool Locked = false;
+	protected object Lock = new object(); 
 
 
 	protected AppFlow(IViewApp viewApp, IMoveProvider moveProvider, ICoordinatesTranslator coordinatesTranslator)
