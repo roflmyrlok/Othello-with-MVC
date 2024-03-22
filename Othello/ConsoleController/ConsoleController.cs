@@ -1,19 +1,20 @@
-﻿using AppModel;
+﻿using AiOthelloModel;
+using AppModel;
 
 namespace ConsoleController;
 
 public class ConsoleController
 {
 	private AppFlow _app;
+	private IViewApp _viewApp;
 
-	public ConsoleController(AppFlow appFlow)
+	public ConsoleController(IViewApp viewApp)
 	{
-		_app = appFlow;
+		_viewApp = viewApp;
 	}
 
 	public void Start()
 	{
-		Console.WriteLine("Create new game:" + "ng name tForHint tForBot tForTimer");
 		while (true)
 		{
 			try
@@ -35,71 +36,59 @@ public class ConsoleController
 	{
 		try
 		{
-			if (newInput.Length == 0)
-			{
-				return;
-			}
-			string column = "";
-			int row = 0;
+			if (newInput.Length == 0) { return; }
 			var splitInput = newInput.Split(" ");
 			var l = splitInput.Length;
 			
 			switch (l)
 			{
 				case 1:
-					if (splitInput[0] == "hint")
-					{
-						Hint();
-					}
-					if (splitInput[0] == "c")
-					{
-						Cancel();
-					}
+					if (splitInput[0] == "hint") {Hint();}
+					if (splitInput[0] == "c") {Cancel();}
 					break;
-				case 5:
-					if (splitInput[0] != "ng")
-					{
-						break;
-					}
-					var name = splitInput[1];
-					var hint = splitInput[2] == "t";
-					var bot = splitInput[3] == "t";
-					var timer = splitInput[4] == "t";
-					NewGame(name, hint, bot, timer);
+				case 4:
+					if (splitInput[0] != "ng") { break; }
+					var hint = splitInput[1] == "t";
+					var bot = splitInput[2] == "t";
+					var timer = splitInput[3] == "t";
+					NewGame(hint, bot, timer);
 					break;
-
-					
 				case 2:
-					foreach (var spl in splitInput)
-					{
-						var lrow = 0;
-						if (!int.TryParse(spl, out lrow))
-						{
-							column = spl;
-						}
-						else
-						{
-							row = lrow;
-						}
-					}
-					PassMove(row, column);
+					PassMove(splitInput);
 					break;
 			}
 		}
 		catch (Exception e)
 		{
-			//Console.WriteLine(e);
-			//throw new Exception("cannot process the input");
+			Console.WriteLine("ops, ff");
+			Console.WriteLine(e.Message);
+			Console.WriteLine(e);
 		}
 	}
-	private void PassMove(int row, string column)
+	private void PassMove(string[] splitInput)
 	{
+		int row = -1;
+		string column = "";
+		
+		foreach (var spl in splitInput)
+		{
+			var lrow = 0;
+			if (!int.TryParse(spl, out lrow))
+			{
+				column = spl;
+			}
+			else
+			{
+				row = lrow;
+			}
+		}
 		_app.MakeMoveInCurrentGame(row, column);
 	}
 	
-	private void NewGame(string name, bool hint, bool bot, bool timer)
+	private void NewGame(bool hint, bool bot, bool timer)
 	{
-		_app.SetNewGame(name, hint, bot, timer);
+		_app = bot ? new AppFlowPvE(_viewApp, new Ai(), new BoardCoordinatesInternalTranslator()) : new AppFlowPvP(_viewApp, new Ai(), new BoardCoordinatesInternalTranslator());
+		_app.SetNewGame(hint, timer);
 	}
 
 	private void Hint()
