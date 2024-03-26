@@ -32,9 +32,18 @@ public class HumanPlayerNotifyable : GenericPlayerNotifyable
 		try
 		{
 			Console.WriteLine("Provide input for move of " + this._currentPlayerCellState);
+			Console.WriteLine("Format: player number + space +, row and column in any order separated by space");
 			var input = Console.ReadLine();
 
 			var splitInput = input.Split(" ");
+			if (splitInput[0] == 1.ToString() || splitInput[0] == 2.ToString())
+			{
+				splitInput = splitInput[1..];
+			}
+			else
+			{
+				PlayerRequestAction();
+			}
 		
 			int row = -1;
 			string column = "";

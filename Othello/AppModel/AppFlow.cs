@@ -34,6 +34,7 @@ public class AppFlow : IAppControl, IView, IGameProvider
 		AutoMoveOnTimer.AutoReset = false;
 		AutoMoveOnTimer.Disposed += StopAutoTurnTimerAfterAutoTurnMove;
 		AutoMoveOnTimer.Elapsed += MakeAutoMoveOnOnTimer;
+		CurrentConfig.Win = true; // previoius game ended
 	}
 
 	private void StopAutoTurnTimerAfterAutoTurnMove(object? sender, EventArgs e)
@@ -65,12 +66,34 @@ public class AppFlow : IAppControl, IView, IGameProvider
 
 	private bool _internalMoveOnTimer()
 	{
-		return TryMakeMoveInCurrentGame(new Random().Next(0, 7),
-			CoordinatesTranslator.ConvertNumberToLetter(new Random().Next(0, 7)), GetOps(LastPlayerToMakeMove));
+		var Krow = 0;
+		var t =  CurrentGame.GetAvailableMovesData();
+		foreach (var row in t)
+		{
+			var Kcolumn = 0;
+			foreach (var column in row)
+			{
+				if (column)
+				{
+					if (TryMakeMoveInCurrentGame(Krow + 1, CoordinatesTranslator.ConvertNumberToLetter(Kcolumn + 1),
+						    GetOps(LastPlayerToMakeMove)))
+					{
+						ViewApp.ShowEventTimerMoveComing(Krow+1, CoordinatesTranslator.ConvertNumberToLetter(Kcolumn+1));
+						return true;
+					}
+				}
+				Kcolumn++;
+			}
+			Krow++;
+
+		}
+		return TryMakeMoveInCurrentGame(new Random().Next(1, 8),
+			CoordinatesTranslator.ConvertNumberToLetter(new Random().Next(1, 8)), GetOps(LastPlayerToMakeMove));
 	}
 	
 	public bool SetNewGame(bool autoHint, bool timer,  IPlayerNotifyable  playerNotifyable1 , IPlayerNotifyable playerNotifyable2)
 	{
+		CurrentConfig.Win = false;
 		PlayerNotifyable = new List<IPlayerNotifyable>();
 		PlayerNotifyable.Add(playerNotifyable1);
 		PlayerNotifyable.Add(playerNotifyable2);

@@ -16,6 +16,16 @@ public class ConsoleController
 		_viewApp = viewApp;
 		while (true)
 		{
+			if (_app != null)
+			{
+				if (_app.CurrentConfig != null)
+				{
+					if (!_app.CurrentConfig.Win)
+					{
+						continue;
+					}
+				}
+			}
 			try
 			{
 				var input = Console.ReadLine();
@@ -43,6 +53,7 @@ public class ConsoleController
 				var l = splitInput.Length;
 				if (l != 4 && (splitInput[0] != "ng") )
 				{
+					return;
 					Console.WriteLine("badinput");
 				}
 				var hint = splitInput[1] == "t";
