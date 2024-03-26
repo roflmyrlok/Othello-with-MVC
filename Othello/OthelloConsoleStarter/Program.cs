@@ -19,6 +19,5 @@ Console.WriteLine("p.s. exception => bug V I forgot to remove it while testing w
 
 var view = new ConsoleView.ConsoleView();
 var c = new ConsoleController.ConsoleController(view);
-c.Start();
 
 

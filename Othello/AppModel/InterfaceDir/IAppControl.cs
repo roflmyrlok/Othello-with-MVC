@@ -1,9 +1,12 @@
+using Model;
+
 namespace AppModel;
 
 public interface IAppControl
-{ 
-	void SetNewGame(bool autoHint, bool Timer);
-	void MakeMoveInCurrentGame(int row, string column);
-	void CancelLastMove();
-	void GetHint();
+{
+	public bool SetNewGame(bool autoHint, bool timer, IPlayerNotifyable playerNotifyable1,
+		IPlayerNotifyable playerNotifyable2);
+	public bool TryMakeMoveInCurrentGame(int row, string column, CellState playerToMakeAction);
+	bool TryCancelLastMove(CellState playerToMakeAction);
+	bool  TryGetHint(CellState playerToMakeAction);
 }

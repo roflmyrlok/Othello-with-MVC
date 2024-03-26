@@ -5,7 +5,7 @@ using Model;
 namespace AiOthelloModel;
 
 
-public class Ai : IMoveProvider
+public class Ai
 {
 	public (int, int) DetermineBestMove(GameBoard gameBoard, List<List<bool>> am)
 	{
