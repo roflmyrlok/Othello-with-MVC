@@ -30,15 +30,15 @@ public class BotPlayerNotifyable : GenericPlayerNotifyable
 	}
 	public override void OpponentMoveMaid(CellState receiver)
 	{
-		if (_timer.Enabled)
-		{
-			_timer.Dispose();
-		}
 		if (receiver != this._currentPlayerCellState)
 		{
 			return;
 		}
-
+		if (_timer.Enabled)
+		{
+			_timer.Dispose();
+		}
+		
 		_timer.Elapsed += TimerMidCover;
 		_timer.Start();
 	}
@@ -67,10 +67,10 @@ public class BotPlayerNotifyable : GenericPlayerNotifyable
 		var gameBoard = CurrentGame.TryGetGameBoardData(this._currentPlayerCellState);
 		if (gameBoard == null || availableMoves == null)
 		{
-			throw new Exception("critical bot no data access");
+			throw new Exception("critical - bot no data access, how?");
 		}
 		var move = _bot.DetermineBestMove(gameBoard, availableMoves);
-		_makeMoveOnTimer(move.Item1, CurrentGame.CoordinatesTranslator.ConvertNumberToLetter(move.Item2));
+		_makeMoveOnTimer(move.Item1 + 1, CurrentGame.CoordinatesTranslator.ConvertNumberToLetter(move.Item2 + 1));
 	}
 
 	private void _makeMoveOnTimer(int row, string column)

@@ -48,22 +48,25 @@ public class AppFlow : IAppControl, IView, IGameProvider
 
 	private void MakeAutoMoveOnOnTimer(object? sender, ElapsedEventArgs e)
 	{
-		while (true)
-		{
+		
 			try
 			{
-				CurrentGame.MakeMove(new Random().Next(0, 7), new Random().Next(0, 7), true);
-				break;
+				if (_internalMoveOnTimer())
+				{
+					throw new Exception("bad move on timer, try again (T-T) (anluck)");
+				}
 			}
 			catch (Exception exception)
 			{
-				//
+				_internalMoveOnTimer();
 			}
-		}
-		_notifyOpponentMoveMade(LastPlayerToMakeMove);
-		LastPlayerToMakeMove = GetOps(LastPlayerToMakeMove);
-		LastMoveDateTime = DateTime.Now;
 		
+	}
+
+	private bool _internalMoveOnTimer()
+	{
+		return TryMakeMoveInCurrentGame(new Random().Next(0, 7),
+			CoordinatesTranslator.ConvertNumberToLetter(new Random().Next(0, 7)), GetOps(LastPlayerToMakeMove));
 	}
 	
 	public bool SetNewGame(bool autoHint, bool timer,  IPlayerNotifyable  playerNotifyable1 , IPlayerNotifyable playerNotifyable2)
@@ -77,7 +80,7 @@ public class AppFlow : IAppControl, IView, IGameProvider
 			CurrentGame = newGame;
 			CurrentConfig = new Config(autoHint, timer);
 			ViewApp.ShowAvailableMoves(CurrentGame.GetGameBoardData(), CurrentGame.GetAvailableMovesData(), CurrentGame.CurrentPlayer.CurrentPlayerCellState);
-			_notifyOpponentMoveMade(CellState.Player2);
+			_notifyOpponentMoveMade(CellState.Player1);
 			return true;
 		}
 		catch (Exception e)
@@ -89,6 +92,7 @@ public class AppFlow : IAppControl, IView, IGameProvider
 
 	public bool TryMakeMoveInCurrentGame(int eRow, string eColumn, CellState playerToMakeAction)
 	{
+		ViewApp.ShowEventMoveMadeAttempt(playerToMakeAction ,eRow, eColumn);
 		var column = CoordinatesTranslator.ConvertLetterToNumber(eColumn) - 1;
 		var row = eRow - 1;
 		
@@ -106,6 +110,11 @@ public class AppFlow : IAppControl, IView, IGameProvider
 		}
 		LastPlayerToMakeMove = playerToMakeAction;
 		LastMoveDateTime = DateTime.Now;
+		if (CurrentConfig.Timer)
+		{
+			AutoMoveOnTimer.Dispose();
+			AutoMoveOnTimer.Start();
+		}
 		_notifyOpponentMoveMade(GetOps(playerToMakeAction));
 		return true;
 		
@@ -196,6 +205,12 @@ public class AppFlow : IAppControl, IView, IGameProvider
 		CurrentConfig.Win = true;
 		CurrentConfig.WCellState = currentPlayer;
 	}
+
+	public void ShowEventMoveMade(CellState player, int row, int column)
+	{
+		ViewApp.ShowEventMoveMade(player,  row + 1, CoordinatesTranslator.ConvertNumberToLetter(column + 1));
+	}
+
 
 	private void _notifyOpponentMoveMade(CellState receiver)
 	{

@@ -9,5 +9,7 @@ public interface IViewApp
 	void ShowEventCellOccupied(CellState currentPlayer);
 	void ShowEventWin(CellState cellState);
 	void ShowEventCannotCancelMove();
-	void ShowEventCancel(); 
+	void ShowEventCancel();
+	void ShowEventMoveMade(CellState player, int row, string column);
+	void ShowEventMoveMadeAttempt(CellState player, int row, string column);
 }

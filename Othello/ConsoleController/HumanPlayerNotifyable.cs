@@ -29,29 +29,39 @@ public class HumanPlayerNotifyable : GenericPlayerNotifyable
 
 	protected override void PlayerRequestAction()
 	{
-		var input = Console.ReadLine();
-
-		var splitInput = input.Split(" ");
-		
-		int row = -1;
-		string column = "";
-		
-		foreach (var spl in splitInput)
+		try
 		{
-			var lrow = 0;
-			if (!int.TryParse(spl, out lrow))
+			Console.WriteLine("Provide input for move of " + this._currentPlayerCellState);
+			var input = Console.ReadLine();
+
+			var splitInput = input.Split(" ");
+		
+			int row = -1;
+			string column = "";
+		
+			foreach (var spl in splitInput)
 			{
-				column = spl;
+				var lrow = 0;
+				if (!int.TryParse(spl, out lrow))
+				{
+					column = spl;
+				}
+				else
+				{
+					row = lrow;
+				}
 			}
-			else
+
+			if (!CurrentGame.TryMakeMoveInCurrentGame(row, column, this._currentPlayerCellState))
 			{
-				row = lrow;
+				PlayerRequestAction();
 			}
 		}
-
-		if (!CurrentGame.TryMakeMoveInCurrentGame(row, column, this._currentPlayerCellState))
+		catch (Exception e)
 		{
-			PlayerRequestAction();
+			Console.WriteLine(e);
+			throw;
 		}
+		
 	}
 }

@@ -23,6 +23,7 @@ public class Game : IInteractive, IProvideData
 			return;
 		}
 		_currentGame.MakeMove(row, column, CurrentPlayer.CurrentPlayerCellState);
+		_gameView.ShowEventMoveMade( CurrentPlayer.CurrentPlayerCellState, row, column);
 		_endTurn();
 		if (invisible)
 		{

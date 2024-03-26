@@ -92,6 +92,16 @@ public class ConsoleView : IViewApp
 		Console.WriteLine("Move canceled, restoring game");
 	}
 
+	public void ShowEventMoveMade(CellState player, int row, string column)
+	{
+		Console.WriteLine(player + " made move " + row + " " + column);
+	}
+
+	public void ShowEventMoveMadeAttempt(CellState player, int row, string column)
+	{
+		Console.WriteLine(player + " attempted to make move " + row + " " + column);
+	}
+
 	public void ShowEventWin(CellState cellState)
 	{
 		Console.WriteLine("Winner:" + cellState);

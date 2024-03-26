@@ -38,6 +38,7 @@ public class ConsoleController
 			try
 			{
 				if (newInput.Length == 0) { return; }
+				Console.WriteLine("Provide input for game creation");
 				var splitInput = newInput.Split(" ");
 				var l = splitInput.Length;
 				if (l != 4 && (splitInput[0] != "ng") )
