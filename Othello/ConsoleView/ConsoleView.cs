@@ -5,7 +5,7 @@ namespace ConsoleView;
 
 public class ConsoleView : IViewApp
 {
-	public void ShowChange(GameBoard gameBoard, CellState currentPlayer)
+	public void ShowChange(GameBoard gameBoard, Player currentPlayer)
 	{
 		Console.WriteLine("==========================");
 		foreach (var collumn in gameBoard.Board)
@@ -32,10 +32,10 @@ public class ConsoleView : IViewApp
 			
 		}
 		Console.WriteLine("==========================");
-		Console.WriteLine(currentPlayer + "'s move");
+		Console.WriteLine(currentPlayer.PlayerCellState + "'s move");
 	}
 
-	public void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask,  CellState currentPlayer)
+	public void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask,  Player currentPlayer)
 	{
 		Console.WriteLine(" |=a==b==c==d==e==f==g==h=|");
 		var rowN = 1;
@@ -69,51 +69,31 @@ public class ConsoleView : IViewApp
 			
 		}
 		Console.WriteLine(" ==========================");
-		Console.WriteLine(currentPlayer + "'s move");
+		Console.WriteLine(currentPlayer.PlayerCellState + "'s move");
 	}
 
-	public void ShowEventCellOccupied( CellState currentPlayer)
+	public void ShowCellOccupied(Player occupiedBy)
 	{
-		Console.WriteLine("occupied by:" + currentPlayer.ToString());
+		Console.WriteLine("Cell occupied by " + occupiedBy.PlayerCellState);
 	}
 
-	public void ShowEventAiMoveComing(int row, string column)
+	public void ShowOnWin(Player winner)
 	{
-		Console.WriteLine("Ai move: " + row + column );
+		Console.WriteLine("Game won by " + winner.PlayerCellState);
 	}
 
-	public void ShowEventTimerMoveComing(int row, string column)
+	public void ShowTimerMoveComing(int row, string column)
 	{
-		Console.WriteLine("TIME OUT! RANDOM MOVE " + row + " " + column + " WAS MADE");
+		Console.WriteLine("Time out! Auto-move coming:  " + row + " " + column);
 	}
 
-	public void ShowEventCancel()
+	public void ShowMoveMade(Player madeBy, int row, string column)
 	{
-		Console.WriteLine("Move canceled, restoring game");
+		Console.WriteLine( madeBy.PlayerCellState  + " made move:" + row + " " + column);
 	}
 
-	public void ShowEventMoveMade(CellState player, int row, string column)
+	public void ShowMoveMadeAttempt(Player madeBy, int row, string column)
 	{
-		Console.WriteLine(player + " made move " + row + " " + column);
-	}
-
-	public void ShowEventMoveMadeAttempt(CellState player, int row, string column)
-	{
-		Console.WriteLine(player + " attempted to make move " + row + " " + column);
-	}
-
-	public void ShowEventWin(CellState cellState)
-	{
-		Console.WriteLine("Winner:" + cellState);
-	}
-
-	public void ShowEventCannotCancelMove()
-	{
-		Console.WriteLine("Cannot restore move");
-	}
-
-	public void ShowEventInputDuringBotMove()
-	{
-		Console.WriteLine("Cannot move while bot is thinking");
+		Console.WriteLine( madeBy.PlayerCellState  + " entered move: " + row + " " + column);
 	}
 }

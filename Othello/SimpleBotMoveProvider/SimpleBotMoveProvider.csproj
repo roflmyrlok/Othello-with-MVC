@@ -4,14 +4,10 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>ConsoleController</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Application\Application.csproj" />
-      <ProjectReference Include="..\InternalGameModel\InternalGameModel.csproj" />
-      <ProjectReference Include="..\ServicesForAppModel\ServicesForAppModel.csproj" />
-      <ProjectReference Include="..\SimpleBotMoveProvider\SimpleBotMoveProvider.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 namespace Model;
 
-public interface IProvideData
+public interface IDataProvidable
 {
 	GameBoard GetGameBoardData();
 	List<List<bool>> GetAvailableMovesData();

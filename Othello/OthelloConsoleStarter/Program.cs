@@ -11,7 +11,7 @@ Console.WriteLine("For example: " + "ng t f t");
 Console.WriteLine("will create game with auto hints enabled, bot and timer disabled");
 Console.WriteLine("Timer will make a random move after 20 seconds of afk");
 Console.WriteLine("To get hint just use: hint");
-Console.WriteLine("To undo move use: c");
+Console.WriteLine("To undo move use: u");
 Console.WriteLine("Note that u have 3 seconds to undo move or before enemy makes his move");
 Console.WriteLine("If u losing use: q");
 Console.WriteLine("Good luck!");

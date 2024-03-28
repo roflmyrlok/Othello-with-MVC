@@ -4,13 +4,11 @@ namespace Application;
 
 public interface IViewApp
 {
-	void ShowChange(GameBoard gameBoard, CellState currentPlayer);
-	void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask, CellState currentPlayer);
-	void ShowEventCellOccupied(CellState currentPlayer);
-	void ShowEventWin(CellState cellState);
-	void ShowEventCannotCancelMove();
-	void ShowEventCancel();
-	public void ShowEventTimerMoveComing(int row, string column);
-	void ShowEventMoveMade(CellState player, int row, string column);
-	void ShowEventMoveMadeAttempt(CellState player, int row, string column);
+	void ShowChange(GameBoard gameBoard, Player currentPlayer);
+	void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask, Player currentPlayer);
+	void ShowCellOccupied(Player occupiedBy);
+	void ShowOnWin(Player winner);
+	public void ShowTimerMoveComing(int row, string column);
+	void ShowMoveMade(Player madeBy, int row, string column);
+	void ShowMoveMadeAttempt(Player madeBy, int row, string column);
 }

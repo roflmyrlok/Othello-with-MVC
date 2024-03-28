@@ -1,110 +1,117 @@
 using System.Diagnostics;
+using Application;
+
+namespace Application;
 using System.Timers;
 using Model;
 using Random = System.Random;
 using Timer = System.Timers.Timer;
 
-namespace Application;
 
-public class ApplicationFlow : IAppControl, IView, IGameProvider
+
+public class ApplicationFlow : ISetup, IOthelloGameView, IDataProvidable, IInteractive
 {
-	
-	public List<(int, int)> CurrentGameMoves = new List<(int, int)>();
-	private const int TimeToCancelMove = 3;
-	
-	public readonly IViewApp ViewApp;
-	public List<IPlayer> PlayerNotifyable;
+
+	private List<Move> _currentGameMoves = new List<Move>();
+	private const int TimeToCancelMove = 3; //seconds
+	private const int TimeToMakeMove = 20000; //ms
+
+	private readonly IViewApp _viewApp;
+	public Player PlayerWhite;
+	public Player PlayerBlack;
+	public Player CurrentPlayer;
 	public readonly ICoordinatesTranslator CoordinatesTranslator;
-	
-	
-	public Game CurrentGame;
-	public Config CurrentConfig;
-	public CellState LastPlayerToMakeMove;
-	public DateTime LastMoveDateTime;
-	public Timer AutoMoveOnTimer;
+
+
+	private OthelloGame _currentOthelloGame;
+	private Configuration _configuration;
+	private Timer _autoMoveOnTimer;
 
 	public CellState GameWinner = CellState.Empty;
-	
 
-	public ApplicationFlow(IViewApp viewApp, ICoordinatesTranslator coordinatesTranslator)
+
+	public ApplicationFlow(IViewApp viewApp, ICoordinatesTranslator coordinatesTranslator,
+		Configuration gameConfiguration)
 	{
-		ViewApp = viewApp;
+		_viewApp = viewApp;
 		CoordinatesTranslator = coordinatesTranslator;
-		CurrentGame = new Game(this);
-		CurrentConfig = new Config();
-		AutoMoveOnTimer	= new Timer(20000);
-		AutoMoveOnTimer.AutoReset = false;
-		AutoMoveOnTimer.Disposed += StopAutoTurnTimerAfterAutoTurnMove;
-		AutoMoveOnTimer.Elapsed += MakeAutoMoveOnOnTimer;
+		_currentOthelloGame = new OthelloGame(this);
+		_configuration = gameConfiguration;
+		_autoMoveOnTimer = new Timer(TimeToMakeMove);
+		_autoMoveOnTimer.AutoReset = false;
 	}
 
-	private void StopAutoTurnTimerAfterAutoTurnMove(object? sender, EventArgs e)
-	{
-		//if bot made move reset bot timer
-		AutoMoveOnTimer = new Timer();
-		AutoMoveOnTimer.Interval  = 20000;
-		AutoMoveOnTimer.AutoReset = false;
-		AutoMoveOnTimer.Disposed += StopAutoTurnTimerAfterAutoTurnMove;
-		AutoMoveOnTimer.Elapsed += MakeAutoMoveOnOnTimer;
-	}
 
-	private void MakeAutoMoveOnOnTimer(object? sender, ElapsedEventArgs e)
-	{
-		
-			try
-			{
-				if (_internalMoveOnTimer())
-				{
-					throw new Exception("bad move on timer, try again (T-T) (anluck)");
-				}
-			}
-			catch (Exception exception)
-			{
-				_internalMoveOnTimer();
-			}
-		
-	}
 
-	private bool _internalMoveOnTimer()
+
+//	IInteractive
+
+
+	public bool TryMakeMoveInCurrentGame(int row, string column, Player playerToMakeAction)
 	{
-		var Krow = 0;
-		var t =  CurrentGame.GetAvailableMovesData();
-		foreach (var row in t)
+		if (GameWinner != CellState.Empty)
 		{
-			var Kcolumn = 0;
-			foreach (var column in row)
-			{
-				if (column)
-				{
-					if (TryMakeMoveInCurrentGame(Krow + 1, CoordinatesTranslator.ConvertNumberToLetter(Kcolumn + 1),
-						    GetOps(LastPlayerToMakeMove)))
-					{
-						ViewApp.ShowEventTimerMoveComing(Krow+1, CoordinatesTranslator.ConvertNumberToLetter(Kcolumn+1));
-						return true;
-					}
-				}
-				Kcolumn++;
-			}
-			Krow++;
-
+			return false;
 		}
-		return TryMakeMoveInCurrentGame(new Random().Next(1, 8),
-			CoordinatesTranslator.ConvertNumberToLetter(new Random().Next(1, 8)), GetOps(LastPlayerToMakeMove));
-	}
-	
-	public bool SetNewGame(bool autoHint, bool timer,  IPlayer  playerNotifyable1 , IPlayer playerNotifyable2)
-	{
-		GameWinner = CellState.Empty;
-		PlayerNotifyable = new List<IPlayer>();
-		PlayerNotifyable.Add(playerNotifyable1);
-		PlayerNotifyable.Add(playerNotifyable2);
+		_viewApp.ShowMoveMadeAttempt(playerToMakeAction, row, column);
+		if (playerToMakeAction != CurrentPlayer || playerToMakeAction.Opponent is null)
+		{
+			return false;
+		}
+
+		if (_currentOthelloGame.IsBadMove(row - 1, CoordinatesTranslator.ConvertLetterToNumber(column) - 1))
+		{
+			return false;
+		}
+
+		var move = new Move(CurrentPlayer, row - 1, CoordinatesTranslator.ConvertLetterToNumber(column) - 1,
+			DateTime.Now);
 		try
 		{
-			var newGame = new Game(this);
-			CurrentGame = newGame;
-			CurrentConfig = new Config(autoHint, timer);
-			ViewApp.ShowAvailableMoves(CurrentGame.GetGameBoardData(), CurrentGame.GetAvailableMovesData(), CurrentGame.CurrentPlayer);
-			_notifyOpponentMoveMade(CellState.White);
+			_currentOthelloGame.MakeMove(move.InternalRow, move.InternalColumn);
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+		_currentGameMoves.Add(move);
+		CurrentPlayer = CurrentPlayer.Opponent;
+		CurrentPlayer.OpponentMoveMaid();
+		return true;
+
+	}
+
+	public bool TryCancelLastMove(Player playerToMakeAction)
+	{
+		throw new NotImplementedException();
+	}
+
+	public bool TryGetHint(Player playerToMakeAction)
+	{
+		if (playerToMakeAction == CurrentPlayer)
+		{
+			var gb = _currentOthelloGame.GetGameBoardData();
+			var am = _currentOthelloGame.GetAvailableMovesData();
+			_viewApp.ShowAvailableMoves(gb, am, playerToMakeAction);
+			return true;
+		}
+		return false;
+	}
+//Setup
+
+	public bool Setup(bool autoHint, bool timer,  Player  playerWhite , Player playerBlack)
+	{
+		GameWinner = CellState.Empty;
+		PlayerWhite = (playerWhite);
+		PlayerBlack = (playerBlack);
+		CurrentPlayer = PlayerBlack;
+		try
+		{
+			var newGame = new OthelloGame(this);
+			_currentOthelloGame = newGame;
+			_configuration = new Configuration(autoHint, timer);
+			ShowField(_currentOthelloGame.GetGameBoardData(), CurrentPlayer.PlayerCellState);
+			playerBlack.OpponentMoveMaid();
 			return true;
 		}
 		catch (Exception e)
@@ -114,159 +121,96 @@ public class ApplicationFlow : IAppControl, IView, IGameProvider
 		
 	}
 
-	public bool TryMakeMoveInCurrentGame(int eRow, string eColumn, CellState playerToMakeAction)
-	{
-		ViewApp.ShowEventMoveMadeAttempt(playerToMakeAction ,eRow, eColumn);
-		var column = CoordinatesTranslator.ConvertLetterToNumber(eColumn) - 1;
-		var row = eRow - 1;
-		
-		if (LastPlayerToMakeMove == playerToMakeAction)
-		{
-			return false;
-		}
-		try
-		{
-			CurrentGame.MakeMove(row, column);
-		}
-		catch (Exception e)
-		{
-			return false;
-		}
-		LastPlayerToMakeMove = playerToMakeAction;
-		LastMoveDateTime = DateTime.Now;
-		if (CurrentConfig.Timer)
-		{
-			AutoMoveOnTimer.Dispose();
-			AutoMoveOnTimer.Start();
-		}
-		_notifyOpponentMoveMade(GetOps(playerToMakeAction));
-		return true;
-		
-	}
 
-	public bool TryCancelLastMove(CellState playerToMakeAction)
-	{
-		if (LastPlayerToMakeMove != playerToMakeAction)
-		{
-			return false;
-		}
-
-		if (LastMoveDateTime.AddSeconds(TimeToCancelMove) >= DateTime.Now)
-		{
-			return false;
-		}
-
-		if (CurrentGameMoves.Count == 0)
-		{
-			return false;
-		}
-		
-		for (int i = 0; i < CurrentGameMoves.Count - 1; i++)
-		{
-			CurrentGame.MakeMove(CurrentGameMoves[i].Item1, CurrentGameMoves[i].Item2, true);
-		}
-		CurrentGameMoves = CurrentGameMoves.Count == 1 ? new List<(int, int)>() : CurrentGameMoves[..^1];
-		LastMoveDateTime = DateTime.Now.AddSeconds(- TimeToCancelMove); // cannot cancel more moves
-		LastPlayerToMakeMove = GetOps(LastPlayerToMakeMove);
-		CurrentGame.ShowAvailableMoves();
-		NotifyOpponentMoveCanceled(GetOps(playerToMakeAction));
-		return true;
-	}
-
-	public bool TryGetHint(CellState playerToMakeAction)
-	{
-		if (LastPlayerToMakeMove == playerToMakeAction)
-		{
-			return false;
-		}
-		CurrentGame.ShowAvailableMoves();
-		return true;
-	}
-
-	private CellState GetOps(CellState I)
-	{
-		if (I == CellState.White)
-		{
-			return CellState.Black;
-		}
-		if (I == CellState.Black)
-		{
-			return CellState.White;
-		}
-		//if (I == CellState.Empty){
-		throw new Exception("how?");
-		
-	}
+//IDataProvidable
 	
-	
-	
-	// IView Implementation can be moved in separate class?
+	public GameBoard? TryGetGameBoardData(Player dataReceiver)
+	{
+		if (dataReceiver == CurrentPlayer)
+		{
+			return _currentOthelloGame.GetGameBoardData();
+		}
+
+		return null;
+	}
+
+	public List<List<bool>>? TryGetAvailableMovesData(Player dataReceiver)
+	{
+		if (dataReceiver == CurrentPlayer)
+		{
+			return _currentOthelloGame.GetAvailableMovesData();
+		}
+
+		return null;
+	} 
+//IOthelloGameView
+
 	public void ShowField(GameBoard gameBoard, CellState currentPlayer)
 	{
-		if (CurrentConfig.AutoHint)
+		if (_configuration.AutoHint)
 		{
-			ShowAvailableMoves(gameBoard, CurrentGame.GetAvailableMovesData(), currentPlayer);
+			var am = _currentOthelloGame.GetAvailableMovesData();
+			ShowAvailableMoves(gameBoard, am, currentPlayer);
 			return;
 		}
-		ViewApp.ShowChange(gameBoard, currentPlayer);
+
+		switch (currentPlayer)
+		{
+			case CellState.White:
+				_viewApp.ShowChange(gameBoard, PlayerBlack);
+				break;
+			case CellState.Black:
+				_viewApp.ShowChange(gameBoard, PlayerWhite);
+				break;
+			default:
+				ShowOnWin(GameWinner);
+				break;
+		}
 	}
 
 	public void ShowAvailableMoves(GameBoard gameBoard, List<List<bool>> movesMask, CellState currentPlayer)
 	{
-		ViewApp.ShowAvailableMoves(gameBoard, movesMask, currentPlayer);
+		if (currentPlayer == CellState.White)
+		{
+			_viewApp.ShowAvailableMoves(gameBoard, movesMask, PlayerWhite );
+		}
+		else if (currentPlayer == CellState.Black)
+		{
+			_viewApp.ShowAvailableMoves(gameBoard, movesMask, PlayerBlack );
+		}
+		else
+		{
+			ShowOnWin(GameWinner);	
+		}
 	}
 
-	public void ShowEventCellOccupied(CellState currentPlayer)
+	public void ShowCellOccupied(CellState currentPlayer)
 	{
-		ViewApp.ShowEventCellOccupied(currentPlayer);
-		CurrentGame.ShowField();
-		throw new Exception("cell occupied");
+		_viewApp.ShowCellOccupied(CurrentPlayer);
+		_currentOthelloGame.ShowField();
 	}
 
-	public void ShowEventWinCondition(CellState currentPlayer)
+	public void ShowOnWin(CellState currentPlayer)
 	{
-		ViewApp.ShowEventWin(currentPlayer);
+		_viewApp.ShowOnWin(CurrentPlayer);
 		GameWinner = currentPlayer;
 	}
 
-	public void ShowEventMoveMade(CellState player, int row, int column)
+	public void ShowMoveMade(CellState player, int row, int column)
 	{
-		ViewApp.ShowEventMoveMade(player,  row + 1, CoordinatesTranslator.ConvertNumberToLetter(column + 1));
-	}
-
-
-	private void _notifyOpponentMoveMade(CellState receiver)
-	{
-		foreach (var player in PlayerNotifyable)
+		if (player == CellState.White)
 		{
-			player.OpponentMoveMaid(receiver);
+			_viewApp.ShowMoveMade(PlayerWhite,  row + 1, CoordinatesTranslator.ConvertNumberToLetter(column + 1));
+		}
+		else if (player == CellState.Black)
+		{
+			_viewApp.ShowMoveMade(PlayerBlack,  row + 1, CoordinatesTranslator.ConvertNumberToLetter(column + 1));
+		}
+		else
+		{
+			ShowOnWin(GameWinner);	
 		}
 	}
-	private void NotifyOpponentMoveCanceled(CellState receiver)
-	{
-		foreach (var player in PlayerNotifyable)
-		{
-			player.OpponentMoveCanceled(receiver);
-		}
-	}
-
-	public GameBoard? TryGetGameBoardData(CellState dataReceiver)
-	{
-		if (dataReceiver == GetOps(LastPlayerToMakeMove))
-		{
-			return CurrentGame.GetGameBoardData();
-		}
-
-		return null;
-	}
-
-	public List<List<bool>>? TryGetAvailableMovesData(CellState dataReceiver)
-	{
-		if (dataReceiver == GetOps(LastPlayerToMakeMove))
-		{
-			return CurrentGame.GetAvailableMovesData();
-		}
-
-		return null;
-	}
+	
+	
 }

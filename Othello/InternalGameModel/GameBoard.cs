@@ -55,7 +55,9 @@ namespace Model
         private bool IsValidMove(int row, int col, CellState currentPlayer)
         {
             if (Board[row][col].CellState != CellState.Empty)
+            {
                 return false;
+            }
 
             int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
             int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
@@ -81,14 +83,14 @@ namespace Model
             return false;
         }
 
-        public bool IsValidMovePublic(int row, int col, CellState player)
+        public bool IsBadMove(int row, int col, CellState player)
         {
             return (!IsValidPosition(row, col) || Board[row][col].CellState != CellState.Empty ||
                     !IsValidMove(row, col, player));
         }
         public void MakeMove(int row, int col, CellState player)
         {
-            if (IsValidMovePublic(row, col, player))
+            if (IsBadMove(row, col, player))
             {
                 throw new Exception("how?");
             }

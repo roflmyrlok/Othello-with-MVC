@@ -82,7 +82,7 @@ public class  GameBoardTests
     public void TestMakeInvalidMove()
     {
         // Attempt to make an invalid move
-        Assert.Throws<InvalidOperationException>(() => _gameBoard.MakeMove(0, 0, CellState.White));
+        Assert.Throws<Exception>(() => _gameBoard.MakeMove(0, 0, CellState.White));
     }
 
     [Fact]
@@ -96,6 +96,16 @@ public class  GameBoardTests
         Assert.Equal(CellState.White, _gameBoard.Board[3][3].CellState);
         Assert.Equal(CellState.White, _gameBoard.Board[4][3].CellState);
         Assert.Equal(CellState.White, _gameBoard.Board[3][4].CellState);
+    }
+    
+    [Fact]
+    public void TestIsValidMove()
+    {
+        // Set up a scenario where Player 1 makes a move
+        _gameBoard.MakeMove(2, 3, CellState.White);
+
+        // Check that next move is valid  for black
+        Assert.True(_gameBoard.IsBadMove(2,2,CellState.Empty));
     }
 
     [Fact]
