@@ -1,5 +1,5 @@
 ﻿using System.Security.Cryptography;
-using AppModel;
+using Application;
 using Model;
 
 namespace AiOthelloModel;

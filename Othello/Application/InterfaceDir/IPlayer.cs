@@ -1,8 +1,8 @@
 using Model;
 
-namespace AppModel;
+namespace Application;
 
-public interface IPlayerNotifyable
+public interface IPlayer
 {
 	void OpponentMoveCanceled(CellState receiver);
 	void OpponentMoveMaid(CellState receiver);

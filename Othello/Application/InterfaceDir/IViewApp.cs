@@ -1,6 +1,6 @@
 using Model;
 
-namespace AppModel;
+namespace Application;
 
 public interface IViewApp
 {

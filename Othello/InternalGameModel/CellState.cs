@@ -3,6 +3,6 @@
 public enum CellState
 {
 	Empty,
-	Player1,
-	Player2
+	White,
+	Black
 }

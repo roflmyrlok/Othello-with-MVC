@@ -1,4 +1,4 @@
-using AppModel;
+using Application;
 
 namespace ConsoleController;
 

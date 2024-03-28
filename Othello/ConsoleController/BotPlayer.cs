@@ -1,16 +1,16 @@
 using System.Timers;
 using AiOthelloModel;
-using AppModel;
+using Application;
 using Model;
 using Timer = System.Timers.Timer;
 
 namespace ConsoleController;
 
-public class BotPlayerNotifyable : GenericPlayerNotifyable
+public class BotPlayer : GenericPlayer
 {
 	private AiOthelloModel.Ai _bot;
 	private Timer _timer;
-	public BotPlayerNotifyable(CellState currentPlayerCellState, AppFlow currentGame, Ai bot) : base (currentPlayerCellState, currentGame)
+	public BotPlayer(CellState currentPlayerCellState, ApplicationFlow currentGame, Ai bot) : base (currentPlayerCellState, currentGame)
 	{
 		_bot = bot;
 		_timer = new Timer();

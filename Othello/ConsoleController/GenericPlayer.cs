@@ -1,14 +1,14 @@
-using AppModel;
+using Application;
 using Model;
 
 namespace ConsoleController;
 
-public abstract class GenericPlayerNotifyable : IPlayerNotifyable
+public abstract class GenericPlayer : IPlayer
 {
-	protected AppFlow CurrentGame;
+	protected ApplicationFlow CurrentGame;
 	protected CellState _currentPlayerCellState;
 	
-	protected GenericPlayerNotifyable(CellState currentPlayerCellState, AppFlow currentGame)
+	protected GenericPlayer(CellState currentPlayerCellState, ApplicationFlow currentGame)
 	{
 		CurrentGame = currentGame;
 		_currentPlayerCellState = currentPlayerCellState;

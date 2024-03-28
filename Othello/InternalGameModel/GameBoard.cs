@@ -135,10 +135,10 @@ namespace Model
         {
             int midRow = Rows / 2;
             int midCol = Columns / 2;
-            Board[midRow - 1][midCol - 1].CellState = CellState.Player2;
-            Board[midRow - 1][midCol].CellState = CellState.Player1;
-            Board[midRow][midCol - 1].CellState = CellState.Player1;
-            Board[midRow][midCol].CellState = CellState.Player2;
+            Board[midRow - 1][midCol - 1].CellState = CellState.Black;
+            Board[midRow - 1][midCol].CellState = CellState.White;
+            Board[midRow][midCol - 1].CellState = CellState.White;
+            Board[midRow][midCol].CellState = CellState.Black;
         }
         
         public bool AnyMovesAvailable(CellState player)
@@ -168,11 +168,11 @@ namespace Model
             {
                 foreach (var cell in row)
                 {
-                    if (cell.CellState == CellState.Player1)
+                    if (cell.CellState == CellState.White)
                     {
                         player1Count++;
                     }
-                    else if (cell.CellState == CellState.Player2)
+                    else if (cell.CellState == CellState.Black)
                     {
                         player2Count++;
                     }
@@ -180,11 +180,11 @@ namespace Model
             }
             if (player1Count > player2Count)
             {
-                return CellState.Player1;
+                return CellState.White;
             }
             else if (player2Count > player1Count)
             {
-                return CellState.Player2;
+                return CellState.Black;
             }
             else
             {

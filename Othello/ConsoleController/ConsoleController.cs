@@ -1,29 +1,26 @@
 ﻿using AiOthelloModel;
-using AppModel;
+using Application;
 using Model;
 
 namespace ConsoleController;
 
 public class ConsoleController
 {
-	private AppFlow _app;
+	private ApplicationFlow _application;
 	private IViewApp _viewApp;
-	private IPlayerNotifyable _playerNotifyable1;
-	private IPlayerNotifyable _playerNotifyable2;
+	private IPlayer _playerNotifyable1;
+	private IPlayer _playerNotifyable2;
 
 	public ConsoleController(IViewApp viewApp)
 	{
 		_viewApp = viewApp;
 		while (true)
 		{
-			if (_app != null)
+			if (_application != null)
 			{
-				if (_app.CurrentConfig != null)
+				if (_application.GameWinner != CellState.Empty)
 				{
-					if (!_app.CurrentConfig.Win)
-					{
-						continue;
-					}
+					continue;
 				}
 			}
 			try
@@ -59,19 +56,19 @@ public class ConsoleController
 				var hint = splitInput[1] == "t";
 				var bot = splitInput[2] == "t";
 				var timer = splitInput[3] == "t";
-				_app = new AppFlow(_viewApp, new BoardCoordinatesInternalTranslator());
-				_playerNotifyable1 = new HumanPlayerNotifyable(CellState.Player1, _app);
+				_application = new ApplicationFlow(_viewApp, new BoardCoordinatesInternalTranslator());
+				_playerNotifyable1 = new HumanPlayer(CellState.White, _application);
 				if (bot)
 				{
-					_playerNotifyable2 = new BotPlayerNotifyable(CellState.Player2, _app, new Ai());
+					_playerNotifyable2 = new BotPlayer(CellState.Black, _application, new Ai());
 				}
 				else
 				{
-					_playerNotifyable2 = new HumanPlayerNotifyable(CellState.Player2, _app);
+					_playerNotifyable2 = new HumanPlayer(CellState.Black, _application);
 				}
 
 				
-				_app.SetNewGame(hint, timer, _playerNotifyable1,
+				_application.SetNewGame(hint, timer, _playerNotifyable1,
 					_playerNotifyable2);
 			}
 			catch (Exception e)

@@ -4,16 +4,16 @@ using Model;
 using Random = System.Random;
 using Timer = System.Timers.Timer;
 
-namespace AppModel;
+namespace Application;
 
-public class AppFlow : IAppControl, IView, IGameProvider
+public class ApplicationFlow : IAppControl, IView, IGameProvider
 {
 	
 	public List<(int, int)> CurrentGameMoves = new List<(int, int)>();
 	private const int TimeToCancelMove = 3;
 	
 	public readonly IViewApp ViewApp;
-	public List<IPlayerNotifyable> PlayerNotifyable;
+	public List<IPlayer> PlayerNotifyable;
 	public readonly ICoordinatesTranslator CoordinatesTranslator;
 	
 	
@@ -22,9 +22,11 @@ public class AppFlow : IAppControl, IView, IGameProvider
 	public CellState LastPlayerToMakeMove;
 	public DateTime LastMoveDateTime;
 	public Timer AutoMoveOnTimer;
+
+	public CellState GameWinner = CellState.Empty;
 	
 
-	public AppFlow(IViewApp viewApp, ICoordinatesTranslator coordinatesTranslator)
+	public ApplicationFlow(IViewApp viewApp, ICoordinatesTranslator coordinatesTranslator)
 	{
 		ViewApp = viewApp;
 		CoordinatesTranslator = coordinatesTranslator;
@@ -34,7 +36,6 @@ public class AppFlow : IAppControl, IView, IGameProvider
 		AutoMoveOnTimer.AutoReset = false;
 		AutoMoveOnTimer.Disposed += StopAutoTurnTimerAfterAutoTurnMove;
 		AutoMoveOnTimer.Elapsed += MakeAutoMoveOnOnTimer;
-		CurrentConfig.Win = true; // previoius game ended
 	}
 
 	private void StopAutoTurnTimerAfterAutoTurnMove(object? sender, EventArgs e)
@@ -91,10 +92,10 @@ public class AppFlow : IAppControl, IView, IGameProvider
 			CoordinatesTranslator.ConvertNumberToLetter(new Random().Next(1, 8)), GetOps(LastPlayerToMakeMove));
 	}
 	
-	public bool SetNewGame(bool autoHint, bool timer,  IPlayerNotifyable  playerNotifyable1 , IPlayerNotifyable playerNotifyable2)
+	public bool SetNewGame(bool autoHint, bool timer,  IPlayer  playerNotifyable1 , IPlayer playerNotifyable2)
 	{
-		CurrentConfig.Win = false;
-		PlayerNotifyable = new List<IPlayerNotifyable>();
+		GameWinner = CellState.Empty;
+		PlayerNotifyable = new List<IPlayer>();
 		PlayerNotifyable.Add(playerNotifyable1);
 		PlayerNotifyable.Add(playerNotifyable2);
 		try
@@ -102,8 +103,8 @@ public class AppFlow : IAppControl, IView, IGameProvider
 			var newGame = new Game(this);
 			CurrentGame = newGame;
 			CurrentConfig = new Config(autoHint, timer);
-			ViewApp.ShowAvailableMoves(CurrentGame.GetGameBoardData(), CurrentGame.GetAvailableMovesData(), CurrentGame.CurrentPlayer.CurrentPlayerCellState);
-			_notifyOpponentMoveMade(CellState.Player1);
+			ViewApp.ShowAvailableMoves(CurrentGame.GetGameBoardData(), CurrentGame.GetAvailableMovesData(), CurrentGame.CurrentPlayer);
+			_notifyOpponentMoveMade(CellState.White);
 			return true;
 		}
 		catch (Exception e)
@@ -168,7 +169,7 @@ public class AppFlow : IAppControl, IView, IGameProvider
 		LastMoveDateTime = DateTime.Now.AddSeconds(- TimeToCancelMove); // cannot cancel more moves
 		LastPlayerToMakeMove = GetOps(LastPlayerToMakeMove);
 		CurrentGame.ShowAvailableMoves();
-		_notifyOpponentMoveCanceled(GetOps(playerToMakeAction));
+		NotifyOpponentMoveCanceled(GetOps(playerToMakeAction));
 		return true;
 	}
 
@@ -184,13 +185,13 @@ public class AppFlow : IAppControl, IView, IGameProvider
 
 	private CellState GetOps(CellState I)
 	{
-		if (I == CellState.Player1)
+		if (I == CellState.White)
 		{
-			return CellState.Player2;
+			return CellState.Black;
 		}
-		if (I == CellState.Player2)
+		if (I == CellState.Black)
 		{
-			return CellState.Player1;
+			return CellState.White;
 		}
 		//if (I == CellState.Empty){
 		throw new Exception("how?");
@@ -200,7 +201,7 @@ public class AppFlow : IAppControl, IView, IGameProvider
 	
 	
 	// IView Implementation can be moved in separate class?
-	public void ShowChange(GameBoard gameBoard, CellState currentPlayer)
+	public void ShowField(GameBoard gameBoard, CellState currentPlayer)
 	{
 		if (CurrentConfig.AutoHint)
 		{
@@ -218,15 +219,14 @@ public class AppFlow : IAppControl, IView, IGameProvider
 	public void ShowEventCellOccupied(CellState currentPlayer)
 	{
 		ViewApp.ShowEventCellOccupied(currentPlayer);
-		CurrentGame.View();
+		CurrentGame.ShowField();
 		throw new Exception("cell occupied");
 	}
 
 	public void ShowEventWinCondition(CellState currentPlayer)
 	{
 		ViewApp.ShowEventWin(currentPlayer);
-		CurrentConfig.Win = true;
-		CurrentConfig.WCellState = currentPlayer;
+		GameWinner = currentPlayer;
 	}
 
 	public void ShowEventMoveMade(CellState player, int row, int column)
@@ -242,7 +242,7 @@ public class AppFlow : IAppControl, IView, IGameProvider
 			player.OpponentMoveMaid(receiver);
 		}
 	}
-	private void _notifyOpponentMoveCanceled(CellState receiver)
+	private void NotifyOpponentMoveCanceled(CellState receiver)
 	{
 		foreach (var player in PlayerNotifyable)
 		{

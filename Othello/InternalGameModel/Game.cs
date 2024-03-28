@@ -5,76 +5,76 @@ public class Game : IInteractive, IProvideData
 	private readonly IView _gameView;
 	private List<List<bool>> _availabilityMask = new List<List<bool>>();
 	private GameBoard _currentGame;
-	public Player CurrentPlayer {  get; private set;  }
+	public CellState CurrentPlayer {  get; private set;  }
 	
 	public Game(IView gameView, int columns = 8, int rows = 8)
 	{
 		_gameView = gameView;
 		_currentGame = new GameBoard(rows, columns);
-		CurrentPlayer = new Player( CellState.Player1);
+		CurrentPlayer = CellState.White;
 	}
 	
 	public void MakeMove(int row, int column, bool invisible = false)
 	{
-		_setAvailableMoves();
-		if (_currentGame.IsValidMovePublic(row, column, CurrentPlayer.CurrentPlayerCellState))
+		SetAvailableMoves();
+		if (_currentGame.IsValidMovePublic(row, column, CurrentPlayer))
 		{ 
-			_gameView.ShowEventCellOccupied(CurrentPlayer.CurrentPlayerCellState);
+			_gameView.ShowEventCellOccupied(CurrentPlayer);
 			return;
 		}
-		_currentGame.MakeMove(row, column, CurrentPlayer.CurrentPlayerCellState);
-		_gameView.ShowEventMoveMade( CurrentPlayer.CurrentPlayerCellState, row, column);
-		_endTurn();
+		_currentGame.MakeMove(row, column, CurrentPlayer);
+		_gameView.ShowEventMoveMade( CurrentPlayer, row, column);
+		EndTurn();
 		if (invisible)
 		{
 			return;
 		}
-		View();
+		ShowField();
 	}
 	
-	private void _endTurn()
+	private void EndTurn()
 	{
 		
-		if (CurrentPlayer.CurrentPlayerCellState == CellState.Player1)
+		if (CurrentPlayer == CellState.White)
 		{
-			CurrentPlayer.CurrentPlayerCellState = CellState.Player2;
+			CurrentPlayer = CellState.Black;
 		}
-		else if (CurrentPlayer.CurrentPlayerCellState == CellState.Player2)
+		else if (CurrentPlayer == CellState.Black)
 		{
-			CurrentPlayer.CurrentPlayerCellState = CellState.Player1;
+			CurrentPlayer = CellState.White;
 		}
 
-		if (_currentGame.AnyMovesAvailable(CurrentPlayer.CurrentPlayerCellState))
+		if (_currentGame.AnyMovesAvailable(CurrentPlayer))
 		{
 			return;
 		}
 		_gameView.ShowEventWinCondition(_currentGame.CalculateWinner());
 		
 	}
-	public void View()
+	public void ShowField()
 	{
-		_gameView.ShowChange(_currentGame, CurrentPlayer.CurrentPlayerCellState);
+		_gameView.ShowField(_currentGame, CurrentPlayer);
 	}
 
 	public void ShowAvailableMoves()
 	{
-		_setAvailableMoves();
-		_gameView.ShowAvailableMoves(_currentGame, _availabilityMask, CurrentPlayer.CurrentPlayerCellState);
+		SetAvailableMoves();
+		_gameView.ShowAvailableMoves(_currentGame, _availabilityMask, CurrentPlayer);
 	}
 
-	private void _setAvailableMoves()
+	private void SetAvailableMoves()
 	{
-		_availabilityMask = _currentGame.GetAvailableMoves(CurrentPlayer.CurrentPlayerCellState);
+		_availabilityMask = _currentGame.GetAvailableMoves(CurrentPlayer);
 	}
 
 	public GameBoard GetGameBoardData()
 	{
-		_setAvailableMoves();
+		SetAvailableMoves();
 		return _currentGame;
 	}
 	public List<List<bool>> GetAvailableMovesData()
 	{
-		_setAvailableMoves();
+		SetAvailableMoves();
 		return _availabilityMask;
 	}
 }

@@ -1,12 +1,12 @@
 using AiOthelloModel;
-using AppModel;
+using Application;
 using Model;
 
 namespace ConsoleController;
 
-public class HumanPlayerNotifyable : GenericPlayerNotifyable
+public class HumanPlayer : GenericPlayer
 {
-	public HumanPlayerNotifyable(CellState currentPlayerCellState, AppFlow currentGame) : base (currentPlayerCellState, currentGame)
+	public HumanPlayer(CellState currentPlayerCellState, ApplicationFlow currentGame) : base (currentPlayerCellState, currentGame)
 	{
 	}
 	public override void OpponentMoveMaid(CellState receiver)

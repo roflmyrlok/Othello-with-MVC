@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OthelloConsoleStarter", "Ot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleController", "ConsoleController\ConsoleController.csproj", "{6B1811C6-6A74-4FDD-B0B4-D09F0BFAE9C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppModel", "AppModel\AppModel.csproj", "{B84A369D-8E74-4D6B-87A1-4416AE18DADD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{B84A369D-8E74-4D6B-87A1-4416AE18DADD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServicesForAppModel", "ServicesForAppModel\ServicesForAppModel.csproj", "{B7E95156-4088-49D2-B061-4A89EB6B8FE6}"
 EndProject

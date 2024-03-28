@@ -1,4 +1,4 @@
-﻿using AppModel;
+﻿using Application;
 using Model;
 
 namespace ConsoleView;
@@ -18,10 +18,10 @@ public class ConsoleView : IViewApp
 					case CellState.Empty:
 						row += " _ ";
 						break;
-					case CellState.Player1:
+					case CellState.White:
 						row += " 1 ";
 						break;
-					case CellState.Player2:
+					case CellState.Black:
 						row += " 2 ";
 						break;
 				}
@@ -55,10 +55,10 @@ public class ConsoleView : IViewApp
 						}
 						rowString += " _ ";
 						break;
-					case CellState.Player1:
+					case CellState.White:
 						rowString += " 1 ";
 						break;
-					case CellState.Player2:
+					case CellState.Black:
 						rowString += " 2 ";
 						break;
 				}

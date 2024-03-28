@@ -1,7 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using AiOthelloModel;
-using AppModel;
+using Application;
 using ConsoleController;
 using ConsoleView;
 
