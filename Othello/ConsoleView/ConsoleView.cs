@@ -96,4 +96,9 @@ public class ConsoleView : IViewApp
 	{
 		Console.WriteLine( madeBy.PlayerCellState  + " entered move: " + row + " " + column);
 	}
+
+	public void ShowUndoMade()
+	{
+		Console.WriteLine("Undo made");
+	}
 }

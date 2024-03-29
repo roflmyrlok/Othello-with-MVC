@@ -120,7 +120,55 @@ public class ApplicationFlow : ISetup, IOthelloGameView, IDataProvidable, IInter
 
 	public bool TryCancelLastMove(Player playerToMakeAction)
 	{
-		throw new NotImplementedException();
+		var callTime = DateTime.Now;
+		if (CurrentPlayer == playerToMakeAction)
+		{
+			return false;
+		}
+		if (_currentGameMoves[^1].PerformedBy != playerToMakeAction)
+		{
+			if (_currentGameMoves[^1].MoveMadeAt < callTime)
+			{
+				return false;
+			}
+		}
+		if (_currentGameMoves[^1].MoveByTimer)
+		{
+			if (_currentGameMoves[^1].MoveMadeAt < callTime)
+			{
+				return false;
+			}
+		}
+		if (_currentGameMoves[^1].MoveMadeAt < DateTime.Now.AddSeconds(-TimeToCancelMove))
+		{
+			if (_currentGameMoves[^1].MoveMadeAt < callTime)
+			{
+				return false;
+			}
+		}
+		try
+		{
+			CurrentPlayer = PlayerBlack;
+			var newOthelloGame = new OthelloGame(this);
+			for (var index = 0; index < _currentGameMoves.Count - 1; index++)
+			{
+				var move = _currentGameMoves[index];
+				newOthelloGame.MakeMove(move.InternalRow, move.InternalColumn, true);
+			}
+			_currentGameMoves = _currentGameMoves[..^1];
+			_currentGameMoves[^1].MoveByTimer = true; // cant undo anymore
+			CurrentPlayer = _currentGameMoves[^1].PerformedBy.Opponent;
+			_currentOthelloGame = newOthelloGame;
+			_viewApp.ShowUndoMade();
+			_viewApp.ShowChange(newOthelloGame.GetGameBoardData(), CurrentPlayer);
+			CurrentPlayer.Opponent.OpponentMoveCanceled();
+			CurrentPlayer.OpponentMoveMaid();
+			return true;
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
 	}
 
 	public bool TryGetHint(Player playerToMakeAction)

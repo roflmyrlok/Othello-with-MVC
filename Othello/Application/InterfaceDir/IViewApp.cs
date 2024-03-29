@@ -11,4 +11,5 @@ public interface IViewApp
 	public void ShowTimerMoveComing(int row, string column);
 	void ShowMoveMade(Player madeBy, int row, string column);
 	void ShowMoveMadeAttempt(Player madeBy, int row, string column);
+	void ShowUndoMade();
 }

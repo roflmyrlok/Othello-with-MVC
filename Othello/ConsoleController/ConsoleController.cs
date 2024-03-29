@@ -61,17 +61,14 @@ public class ConsoleController
 				throw new Exception("wrong input");
 				
 			case 2:
-				if (splitInput[0] != "w" || splitInput[0] != "b")
-				{
-					throw new Exception("wrong input");
-				}
-
 				if (splitInput[1] != "u")
 				{
 					throw new Exception("wrong input");
 				}
-
-				UndoMove(splitInput[0]);
+				if (splitInput[0] == "w" || splitInput[0] == "b")
+				{
+					UndoMove(splitInput[0]);
+				}
 				break;
 		}
 	}
