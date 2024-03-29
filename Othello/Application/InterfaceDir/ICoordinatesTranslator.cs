@@ -1,4 +1,4 @@
-namespace AppModel;
+namespace Application;
 
 public interface ICoordinatesTranslator
 {

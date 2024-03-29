@@ -1,11 +1,10 @@
-﻿using System.Security.Cryptography;
-using AppModel;
+﻿using Application;
 using Model;
 
 namespace AiOthelloModel;
 
 
-public class Ai : IMoveProvider
+public class SimpleBotMoveProvider : IBotMoveProvider 
 {
 	public (int, int) DetermineBestMove(GameBoard gameBoard, List<List<bool>> am)
 	{

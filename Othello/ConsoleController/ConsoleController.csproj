@@ -8,9 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AppModel\AppModel.csproj" />
+      <ProjectReference Include="..\Application\Application.csproj" />
       <ProjectReference Include="..\InternalGameModel\InternalGameModel.csproj" />
       <ProjectReference Include="..\ServicesForAppModel\ServicesForAppModel.csproj" />
+      <ProjectReference Include="..\SimpleBotMoveProvider\SimpleBotMoveProvider.csproj" />
     </ItemGroup>
 
 </Project>

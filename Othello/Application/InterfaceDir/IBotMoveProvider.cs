@@ -1,8 +1,8 @@
 using Model;
 
-namespace AppModel;
+namespace Application;
 
-public interface IMoveProvider
+public interface IBotMoveProvider
 {
 	public (int, int) DetermineBestMove(GameBoard gameBoard, List<List<bool>> am);
 }

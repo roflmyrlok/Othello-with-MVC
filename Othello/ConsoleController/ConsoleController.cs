@@ -1,20 +1,19 @@
 ﻿using AiOthelloModel;
-using AppModel;
+using Application;
+using Model;
 
 namespace ConsoleController;
 
 public class ConsoleController
 {
-	private AppFlow _app;
-	private IViewApp _viewApp;
+	private ApplicationFlow? _application;
+	private readonly IViewApp _viewApp;
+	private Player? _whitePlayer;
+	private Player? _blackPlayer;
 
 	public ConsoleController(IViewApp viewApp)
 	{
 		_viewApp = viewApp;
-	}
-
-	public void Start()
-	{
 		while (true)
 		{
 			try
@@ -22,8 +21,9 @@ public class ConsoleController
 				var input = Console.ReadLine();
 				if (input == "q")
 				{
-					return;
+					break;
 				}
+
 				ParseInput(input);
 			}
 			catch (Exception e)
@@ -32,72 +32,137 @@ public class ConsoleController
 			}
 		}
 	}
+
 	private void ParseInput(string newInput)
 	{
+
+		if (newInput.Length == 0)
+		{
+			return;
+		}
+		var splitInput = newInput.Split(" ").ToList();
+		var l = splitInput.Count;
+		switch (l)
+		{
+			case 4:
+				if (splitInput[0] != "ng")
+				{
+					throw new Exception("cant resolve");
+				}
+				CreateNewGame(splitInput[1..]);
+				break;
+			case 3:
+				if (splitInput[0] == "w" || splitInput[0] == "b")
+				{
+					MakeMove(splitInput);
+					break;
+					
+				}
+				throw new Exception("wrong input");
+				
+			case 2:
+				if (splitInput[1] != "u")
+				{
+					throw new Exception("wrong input");
+				}
+				if (splitInput[0] == "w" || splitInput[0] == "b")
+				{
+					UndoMove(splitInput[0]);
+				}
+				break;
+		}
+	}
+
+	private void CreateNewGame(List<string> splitInput)
+	{
+		if (_application is not null)
+		{
+			//wont work if 2 bots playing game, fix? unknown
+			_application = null;
+		}
+		var hint = splitInput[0] == "t";
+		var bot = splitInput[1] == "t";
+		var timer = splitInput[2] == "t";
+
+		_application = new ApplicationFlow(_viewApp, new BoardCoordinatesInternalTranslator(),
+			new Configuration(hint, timer));
+
+		if (bot && hint && timer)
+		{
+			_whitePlayer = new BotPlayer(CellState.White, _application, new SimpleBotMoveProvider(),
+				new BoardCoordinatesInternalTranslator());
+			_blackPlayer = new BotPlayer(CellState.Black, _application, new SimpleBotMoveProvider(),
+				new BoardCoordinatesInternalTranslator());
+		}
+		else if (bot)
+		{
+			_blackPlayer = new BotPlayer(CellState.Black, _application, new SimpleBotMoveProvider(),
+				new BoardCoordinatesInternalTranslator());
+			_whitePlayer = new HumanPlayerWithConsoleInput(CellState.White, _application);
+		}
+		else
+		{
+			_whitePlayer = new HumanPlayerWithConsoleInput(CellState.White, _application);
+			_blackPlayer = new HumanPlayerWithConsoleInput(CellState.Black, _application);
+		}
+		_whitePlayer.ProvideOpponent(_blackPlayer);
+		_blackPlayer.ProvideOpponent(_whitePlayer);
+		_application.Setup(hint, timer, _whitePlayer,
+			_blackPlayer);
+	}
+
+	private void MakeMove(List<string> splitInput)
+	{
+
+		HumanPlayerWithConsoleInput playerWithConsoleInput;
 		try
 		{
-			if (newInput.Length == 0) { return; }
-			var splitInput = newInput.Split(" ");
-			var l = splitInput.Length;
-			
-			switch (l)
+			if (splitInput[0] == "w")
 			{
-				case 1:
-					if (splitInput[0] == "hint") {Hint();}
-					if (splitInput[0] == "c") {Cancel();}
-					break;
-				case 4:
-					if (splitInput[0] != "ng") { break; }
-					var hint = splitInput[1] == "t";
-					var bot = splitInput[2] == "t";
-					var timer = splitInput[3] == "t";
-					NewGame(hint, bot, timer);
-					break;
-				case 2:
-					PassMove(splitInput);
-					break;
+				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _whitePlayer;
+			}
+			else if (splitInput[0] == "b")
+			{
+				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _blackPlayer;
+			}
+			else
+			{
+				throw new Exception();
 			}
 		}
 		catch (Exception e)
 		{
-			Console.WriteLine("ops, ff");
-			Console.WriteLine(e.Message);
-			Console.WriteLine(e);
+			throw new Exception("Player is not under your control");
 		}
+
+		var row = -1;
+		int.TryParse(splitInput[1], out row);
+		playerWithConsoleInput.TryMakeMove(row, splitInput[2]);
 	}
-	private void PassMove(string[] splitInput)
+
+	private void UndoMove(string playerColour)
 	{
-		int row = -1;
-		string column = "";
-		
-		foreach (var spl in splitInput)
+		HumanPlayerWithConsoleInput playerWithConsoleInput;
+		try
 		{
-			var lrow = 0;
-			if (!int.TryParse(spl, out lrow))
+			if (playerColour == "w")
 			{
-				column = spl;
+				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _whitePlayer;
+			}
+			else if (playerColour == "b")
+			{
+				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _blackPlayer;
 			}
 			else
 			{
-				row = lrow;
+				throw new Exception();
 			}
 		}
-		_app.MakeMoveInCurrentGame(row, column);
-	}
-	
-	private void NewGame(bool hint, bool bot, bool timer)
-	{
-		_app = bot ? new AppFlowPvE(_viewApp, new Ai(), new BoardCoordinatesInternalTranslator()) : new AppFlowPvP(_viewApp, new Ai(), new BoardCoordinatesInternalTranslator());
-		_app.SetNewGame(hint, timer);
-	}
+		catch (Exception e)
+		{
+			throw new Exception("Player is not under your control");
+		}
 
-	private void Hint()
-	{
-		_app.GetHint();
-	}
-
-	private void Cancel()
-	{
-		_app.CancelLastMove();
+		playerWithConsoleInput.TryCancelMove();
 	}
 }
