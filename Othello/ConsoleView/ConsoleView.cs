@@ -5,13 +5,30 @@ namespace ConsoleView;
 
 public class ConsoleView : IViewApp
 {
+	public ConsoleView()
+	{
+		Console.WriteLine("Hello Pudge!");
+		Console.WriteLine("To create new game enter: " + "ng tForHint tForBot tForTimer");
+		Console.WriteLine("For example: " + "ng t f f");
+		Console.WriteLine("Will create game with auto hints enabled, bot and timer disabled");
+		Console.WriteLine("Note that: " + "ng t t t");
+		Console.WriteLine("Will create game were 2 bots are playing and it is the only way to do so");
+		Console.WriteLine("Timer will make a random move after 20 seconds of afk");
+		Console.WriteLine("To make move use: w/b row column");
+		Console.WriteLine("Where 'w 3 c' will try to make move 3 c for white");
+		Console.WriteLine("To get hint just use: w/b hint");
+		Console.WriteLine("To undo move use: w/b u");
+		Console.WriteLine("Note that u have 3 seconds to undo move or before enemy makes his move");
+		Console.WriteLine("If u losing use: q");
+		Console.WriteLine("Good luck!");
+	}
 	public void ShowChange(GameBoard gameBoard, Player currentPlayer)
 	{
 		Console.WriteLine("==========================");
-		foreach (var collumn in gameBoard.Board)
+		foreach (var column in gameBoard.Board)
 		{
 			var row = "=";
-			foreach (var cell in collumn)
+			foreach (var cell in column)
 			{
 				switch (cell.CellState)
 				{
@@ -100,5 +117,10 @@ public class ConsoleView : IViewApp
 	public void ShowUndoMade()
 	{
 		Console.WriteLine("Undo made");
+	}
+
+	public void ShowFailedToPerformRequest()
+	{
+		Console.WriteLine("Can't made this action");
 	}
 }

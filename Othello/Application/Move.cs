@@ -2,9 +2,9 @@ namespace Application;
 
 public class Move(Player performedBy, int internalRow, int internalColumn, DateTime moveMadeAt)
 {
-	public Player PerformedBy = performedBy;
-	public int InternalRow = internalRow;
-	public int InternalColumn = internalColumn;
-	public DateTime MoveMadeAt = moveMadeAt;
-	public bool MoveByTimer = false;
+	internal Player PerformedBy = performedBy;
+	internal int InternalRow = internalRow;
+	internal int InternalColumn = internalColumn;
+	internal DateTime MoveMadeAt = moveMadeAt;
+	internal bool MoveByTimer = false;
 }

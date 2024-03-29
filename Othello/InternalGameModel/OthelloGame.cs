@@ -4,31 +4,31 @@ public class OthelloGame : IInteractive, IDataProvidable
 {
 	private readonly IOthelloGameView _gameOthelloGameView;
 	private List<List<bool>> _availabilityMask = new List<List<bool>>();
-	private GameBoard _currentBoard;
-	public CellState CurrentPlayer {  get; private set;  }
+	private GameBoard _currentBoard; 
+	private CellState _currentPlayer {  get; set;  }
 	
 	public OthelloGame(IOthelloGameView gameOthelloGameView, int columns = 8, int rows = 8)
 	{
 		_gameOthelloGameView = gameOthelloGameView;
 		_currentBoard = new GameBoard(rows, columns);
-		CurrentPlayer = CellState.Black;
+		_currentPlayer = CellState.Black;
 	}
 
 	public bool IsBadMove(int row, int column)
 	{
-		return _currentBoard.IsBadMove(row, column, CurrentPlayer);
+		return _currentBoard.IsBadMove(row, column, _currentPlayer);
 	}
 
 	public void MakeMove(int row, int column, bool invisible = false)
 	{
 		SetAvailableMoves();
-		if (_currentBoard.IsBadMove(row, column, CurrentPlayer))
+		if (_currentBoard.IsBadMove(row, column, _currentPlayer))
 		{ 
-			_gameOthelloGameView.ShowCellOccupied(CurrentPlayer);
+			_gameOthelloGameView.ShowCellOccupied(_currentPlayer);
 			return;
 		}
-		_currentBoard.MakeMove(row, column, CurrentPlayer);
-		_gameOthelloGameView.ShowMoveMade( CurrentPlayer, row, column);
+		_currentBoard.MakeMove(row, column, _currentPlayer);
+		_gameOthelloGameView.ShowMoveMade( _currentPlayer, row, column);
 		EndTurn();
 		
 		if (invisible)
@@ -41,16 +41,16 @@ public class OthelloGame : IInteractive, IDataProvidable
 	private void EndTurn()
 	{
 		
-		if (CurrentPlayer == CellState.White)
+		if (_currentPlayer == CellState.White)
 		{
-			CurrentPlayer = CellState.Black;
+			_currentPlayer = CellState.Black;
 		}
-		else if (CurrentPlayer == CellState.Black)
+		else if (_currentPlayer == CellState.Black)
 		{
-			CurrentPlayer = CellState.White;
+			_currentPlayer = CellState.White;
 		}
 
-		if (_currentBoard.AnyMovesAvailable(CurrentPlayer))
+		if (_currentBoard.AnyMovesAvailable(_currentPlayer))
 		{
 			return;
 		}
@@ -59,18 +59,18 @@ public class OthelloGame : IInteractive, IDataProvidable
 	}
 	public void ShowField()
 	{
-		_gameOthelloGameView.ShowField(_currentBoard, CurrentPlayer);
+		_gameOthelloGameView.ShowField(_currentBoard, _currentPlayer);
 	}
 
 	public void ShowAvailableMoves()
 	{
 		SetAvailableMoves();
-		_gameOthelloGameView.ShowAvailableMoves(_currentBoard, _availabilityMask, CurrentPlayer);
+		_gameOthelloGameView.ShowAvailableMoves(_currentBoard, _availabilityMask, _currentPlayer);
 	}
 
 	private void SetAvailableMoves()
 	{
-		_availabilityMask = _currentBoard.GetAvailableMoves(CurrentPlayer);
+		_availabilityMask = _currentBoard.GetAvailableMoves(_currentPlayer);
 	}
 
 	public GameBoard GetGameBoardData()

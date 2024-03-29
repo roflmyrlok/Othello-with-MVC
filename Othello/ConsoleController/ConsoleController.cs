@@ -75,6 +75,11 @@ public class ConsoleController
 
 	private void CreateNewGame(List<string> splitInput)
 	{
+		if (_application is not null)
+		{
+			//wont work if 2 bots playing game, fix? unknown
+			_application = null;
+		}
 		var hint = splitInput[0] == "t";
 		var bot = splitInput[1] == "t";
 		var timer = splitInput[2] == "t";
@@ -93,21 +98,17 @@ public class ConsoleController
 		{
 			_blackPlayer = new BotPlayer(CellState.Black, _application, new SimpleBotMoveProvider(),
 				new BoardCoordinatesInternalTranslator());
-			_whitePlayer = new HumanPlayerWithConsoleInput(CellState.White, _application,
-				new BoardCoordinatesInternalTranslator());
+			_whitePlayer = new HumanPlayerWithConsoleInput(CellState.White, _application);
 		}
 		else
 		{
-			_whitePlayer = new HumanPlayerWithConsoleInput(CellState.White, _application,
-				new BoardCoordinatesInternalTranslator());
-			_blackPlayer = new HumanPlayerWithConsoleInput(CellState.Black, _application,
-				new BoardCoordinatesInternalTranslator());
+			_whitePlayer = new HumanPlayerWithConsoleInput(CellState.White, _application);
+			_blackPlayer = new HumanPlayerWithConsoleInput(CellState.Black, _application);
 		}
 		_whitePlayer.ProvideOpponent(_blackPlayer);
 		_blackPlayer.ProvideOpponent(_whitePlayer);
 		_application.Setup(hint, timer, _whitePlayer,
 			_blackPlayer);
-		Console.WriteLine("pudge");
 	}
 
 	private void MakeMove(List<string> splitInput)

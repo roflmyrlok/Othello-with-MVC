@@ -2,8 +2,8 @@ namespace Model;
 
 public class Cell
 {
-	public int Row;
-	public int Column;
+	public readonly int Row;
+	public readonly int Column;
 	public CellState CellState;
 
 	public Cell(int row, int column, CellState cellState = CellState.Empty)

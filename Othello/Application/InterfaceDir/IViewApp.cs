@@ -12,4 +12,5 @@ public interface IViewApp
 	void ShowMoveMade(Player madeBy, int row, string column);
 	void ShowMoveMadeAttempt(Player madeBy, int row, string column);
 	void ShowUndoMade();
+	void ShowFailedToPerformRequest();
 }

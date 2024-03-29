@@ -1,11 +1,12 @@
-using Xunit;
 using Model;
+
+namespace ModelUnitTests;
 
 public class  GameBoardTests
 {
     private readonly GameBoard _gameBoard;
-    private int fourth = 4 - 1;
-    private int fifth = 5 - 1;
+    private const int Fourth = 4 - 1;
+    private const int Fifth = 5 - 1;
 
     public GameBoardTests()
     {
@@ -22,10 +23,10 @@ public class  GameBoardTests
         
         // Check some specific cells for initial state
         // Add assertions to check the initial configuration
-        Assert.Equal(CellState.Black, _gameBoard.Board[fifth][fifth].CellState);
-        Assert.Equal(CellState.Black, _gameBoard.Board[fourth][fourth].CellState);
-        Assert.Equal(CellState.White, _gameBoard.Board[fifth][fourth].CellState);
-        Assert.Equal(CellState.White, _gameBoard.Board[fourth][fifth].CellState);
+        Assert.Equal(CellState.Black, _gameBoard.Board[Fifth][Fifth].CellState);
+        Assert.Equal(CellState.Black, _gameBoard.Board[Fourth][Fourth].CellState);
+        Assert.Equal(CellState.White, _gameBoard.Board[Fifth][Fourth].CellState);
+        Assert.Equal(CellState.White, _gameBoard.Board[Fourth][Fifth].CellState);
 
         // Ensure other cells are empty
         for (int i = 0; i < 8; i++)

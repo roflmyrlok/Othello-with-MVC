@@ -3,7 +3,7 @@ using Model;
 
 public abstract class Player
 {
-	protected internal ApplicationFlow CurrentApplicationInstance;
+	protected ApplicationFlow CurrentApplicationInstance;
 	public CellState PlayerCellState;
 	protected internal  Player? Opponent;
 	
