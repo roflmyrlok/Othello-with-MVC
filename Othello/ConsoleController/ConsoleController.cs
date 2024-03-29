@@ -120,83 +120,41 @@ public class ConsoleController
 
 	private void MakeMove(List<string> splitInput)
 	{
-
-		HumanPlayerWithConsoleInput playerWithConsoleInput;
-		try
+		int.TryParse(splitInput[1], out var row);
+		switch (splitInput[0])
 		{
-			if (splitInput[0] == "w")
-			{
-				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _whitePlayer;
-			}
-			else if (splitInput[0] == "b")
-			{
-				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _blackPlayer;
-			}
-			else
-			{
-				throw new Exception();
-			}
+			case "w" when _whitePlayer is HumanPlayerWithConsoleInput player:
+				player.TryMakeMove(row, splitInput[2]);
+				break;
+			case "b" when _blackPlayer is HumanPlayerWithConsoleInput player:
+				player.TryMakeMove(row, splitInput[2]);
+				break;
 		}
-		catch (Exception e)
-		{
-			throw new Exception("Player is not under your control");
-		}
-
-		var row = -1;
-		int.TryParse(splitInput[1], out row);
-		playerWithConsoleInput.TryMakeMove(row, splitInput[2]);
 	}
 
 	private void UndoMove(string playerColour)
 	{
-		HumanPlayerWithConsoleInput playerWithConsoleInput;
-		try
+		switch (playerColour)
 		{
-			if (playerColour == "w")
-			{
-				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _whitePlayer;
-			}
-			else if (playerColour == "b")
-			{
-				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _blackPlayer;
-			}
-			else
-			{
-				throw new Exception();
-			}
+			case "w" when _whitePlayer is HumanPlayerWithConsoleInput player:
+				player.TryCancelMove();
+				break;
+			case "b" when _blackPlayer is HumanPlayerWithConsoleInput player:
+				player.TryCancelMove();
+				break;
 		}
-		catch (Exception e)
-		{
-			throw new Exception("Player is not under your control");
-		}
-
-		playerWithConsoleInput.TryCancelMove();
 	}
 
 	private void Hint(string playerColour)
 	{
-		HumanPlayerWithConsoleInput playerWithConsoleInput;
-		try
+		switch (playerColour)
 		{
-			if (playerColour == "w")
-			{
-				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _whitePlayer;
-			}
-			else if (playerColour == "b")
-			{
-				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _blackPlayer;
-			}
-			else
-			{
-				throw new Exception();
-			}
+			case "w" when _whitePlayer is HumanPlayerWithConsoleInput player:
+				player.TryGetHint();
+				break;
+			case "b" when _blackPlayer is HumanPlayerWithConsoleInput player:
+				player.TryGetHint();
+				break;
 		}
-		catch (Exception e)
-		{
-			throw new Exception("Player is not under your control");
-		}
-
-		playerWithConsoleInput.TryGetHint();
-
 	}
 }
