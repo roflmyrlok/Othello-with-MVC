@@ -29,4 +29,9 @@ public class HumanPlayerWithConsoleInput : Player
 	{
 		return CurrentApplicationInstance.TryCancelLastMove(this);
 	}
+
+	public bool TryGetHint()
+	{
+		return CurrentApplicationInstance.TryGetHint(this);
+	}
 }

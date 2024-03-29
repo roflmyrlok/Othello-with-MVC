@@ -5,6 +5,12 @@ namespace ConsoleView;
 
 public class ConsoleView : IViewApp
 {
+	private Dictionary<CellState, string> _showDict = new Dictionary<CellState, string>
+	{
+		{CellState.Empty, "_"},
+		{CellState.Black, "B"},
+		{CellState.White, "W"},
+	};
 	public ConsoleView()
 	{
 		Console.WriteLine("Hello Pudge!");
@@ -30,18 +36,7 @@ public class ConsoleView : IViewApp
 			var row = "=";
 			foreach (var cell in column)
 			{
-				switch (cell.CellState)
-				{
-					case CellState.Empty:
-						row += " _ ";
-						break;
-					case CellState.White:
-						row += " 1 ";
-						break;
-					case CellState.Black:
-						row += " 2 ";
-						break;
-				}
+				row += " " + _showDict[cell.CellState] + " ";
 			}
 			row += "=";
 			Console.WriteLine(row);
@@ -70,13 +65,13 @@ public class ConsoleView : IViewApp
 							rowString += " a ";
 							break;
 						}
-						rowString += " _ ";
+						rowString += " " + _showDict[CellState.Empty] + " ";
 						break;
 					case CellState.White:
-						rowString += " 1 ";
+						rowString += " " + _showDict[CellState.White] + " ";
 						break;
 					case CellState.Black:
-						rowString += " 2 ";
+						rowString += " " + _showDict[CellState.Black] + " ";
 						break;
 				}
 			}
@@ -91,12 +86,12 @@ public class ConsoleView : IViewApp
 
 	public void ShowCellOccupied(Player occupiedBy)
 	{
-		Console.WriteLine("Cell occupied by " + occupiedBy.PlayerCellState);
+		Console.WriteLine("Cell occupied by " + occupiedBy.PlayerCellState.ToString());
 	}
 
 	public void ShowOnWin(Player winner)
 	{
-		Console.WriteLine("Game won by " + winner.PlayerCellState);
+		Console.WriteLine("Game won by " + winner.PlayerCellState.ToString());
 	}
 
 	public void ShowTimerMoveComing(int row, string column)

@@ -61,13 +61,20 @@ public class ConsoleController
 				throw new Exception("wrong input");
 				
 			case 2:
-				if (splitInput[1] != "u")
+				if (splitInput[1] != "u" && splitInput[1] != "hint")
 				{
 					throw new Exception("wrong input");
 				}
 				if (splitInput[0] == "w" || splitInput[0] == "b")
 				{
-					UndoMove(splitInput[0]);
+					if (splitInput[1] == "hint")
+					{
+						Hint(splitInput[0]);
+					}
+					if (splitInput[1] == "u")
+					{
+						UndoMove(splitInput[0]);
+					}
 				}
 				break;
 		}
@@ -164,5 +171,32 @@ public class ConsoleController
 		}
 
 		playerWithConsoleInput.TryCancelMove();
+	}
+
+	private void Hint(string playerColour)
+	{
+		HumanPlayerWithConsoleInput playerWithConsoleInput;
+		try
+		{
+			if (playerColour == "w")
+			{
+				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _whitePlayer;
+			}
+			else if (playerColour == "b")
+			{
+				playerWithConsoleInput = (HumanPlayerWithConsoleInput) _blackPlayer;
+			}
+			else
+			{
+				throw new Exception();
+			}
+		}
+		catch (Exception e)
+		{
+			throw new Exception("Player is not under your control");
+		}
+
+		playerWithConsoleInput.TryGetHint();
+
 	}
 }
