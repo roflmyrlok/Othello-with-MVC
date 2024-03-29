@@ -6,4 +6,5 @@ public class Move(Player performedBy, int internalRow, int internalColumn, DateT
 	public int InternalRow = internalRow;
 	public int InternalColumn = internalColumn;
 	public DateTime MoveMadeAt = moveMadeAt;
+	public bool MoveByTimer = false;
 }

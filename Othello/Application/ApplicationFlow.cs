@@ -39,12 +39,44 @@ public class ApplicationFlow : ISetup, IOthelloGameView, IDataProvidable, IInter
 		_configuration = gameConfiguration;
 		_autoMoveOnTimer = new Timer(TimeToMakeMove);
 		_autoMoveOnTimer.AutoReset = false;
+		_autoMoveOnTimer.Disposed += ResetAutoMoveOnTimer;
+		_autoMoveOnTimer.Elapsed += PerformAutoMoveOnTimer;
+	}
+
+	private void PerformAutoMoveOnTimer(object? sender, ElapsedEventArgs e)
+	{
+		var move = (new Random().Next(0,7), new Random().Next(0,7));
+		while (_currentOthelloGame.IsBadMove(move.Item1, move.Item2))
+		{
+			move = (new Random().Next(0,7), new Random().Next(0,7));
+		}
+		_viewApp.ShowTimerMoveComing(move.Item1 + 1, CoordinatesTranslator.ConvertNumberToLetter(move.Item2 + 1));
+		if (!TryMakeMoveInCurrentGame(move.Item1 + 1, CoordinatesTranslator.ConvertNumberToLetter(move.Item2 + 1),
+			    CurrentPlayer))
+		{
+			_autoMoveOnTimer.Dispose();
+			_autoMoveOnTimer.Start();
+		}
+		else
+		{
+			_currentGameMoves[^1].MoveByTimer = true;
+		}
+		
+
+		
+	}
+
+	private void ResetAutoMoveOnTimer(object? sender, EventArgs e)
+	{
+		_autoMoveOnTimer.Stop();
+		_autoMoveOnTimer = new Timer(TimeToMakeMove);
+		_autoMoveOnTimer.AutoReset = false;
+		_autoMoveOnTimer.Disposed += ResetAutoMoveOnTimer;
+		_autoMoveOnTimer.Elapsed += PerformAutoMoveOnTimer;
 	}
 
 
-
-
-//	IInteractive
+	//	IInteractive
 
 
 	public bool TryMakeMoveInCurrentGame(int row, string column, Player playerToMakeAction)
@@ -76,6 +108,11 @@ public class ApplicationFlow : ISetup, IOthelloGameView, IDataProvidable, IInter
 		}
 		_currentGameMoves.Add(move);
 		CurrentPlayer = CurrentPlayer.Opponent;
+		if (_configuration.Timer)
+		{
+			_autoMoveOnTimer.Dispose();
+			_autoMoveOnTimer.Start();
+		}
 		CurrentPlayer.OpponentMoveMaid();
 		return true;
 
