@@ -1,24 +1,167 @@
-###### Assignment #2
-## Lets play
+# Othello Game API Specification
 
-### Goals:
-The goal of this assignment is to implement a console-based Reversi (Othello) game using the Model-View-Controller (MVC) design pattern. By completing this assignment, students will gain a better understanding of MVC pattern and its practical application in developing software systems.
+## Authentication
 
+### Register a New User
 
-### Task
-1. Implement a [Reversi](https://en.wikipedia.org/wiki/Reversi) game playable through the command-line interface (CLI). There are lot of places on the  internet where you can try playing reversi, e.g. [here](https://cardgames.io/reversi/) or [here](https://www.crazygames.com/game/reversi-online)
-2. The game should adhere to the rules of Reversi, also known as Othello.
-3. Players should be able to make moves by inputting coordinates for their desired move.
-4. The game must support player vs. player (PvP) and player vs. simple bot (PvE) modes.
-5. User must be able to start a new game after completing previous without restarting an app.
-6. To simulate real-world interaction, in PvE mode little random delay (from one to few seconds) must be applied after player's move before bots move
-7. Active player can undo a move during 3 seconds after making it AND while opponent did not make his turn.
-8. Move duration must be limited to 20 seconds. Random move must be performed if user failed to make a move during this time.
-9. Player can ask for a hint and get all possible moves highlighted.
-10. Include comprehensive unit tests to validate the functionality of the game components.  Unit tests should cover critical aspects such as move validation, game state transitions, and edge cases. 
+- **POST** `/auth/register`
+- **Body**:
+  - `username`: String
+  - `password`: String
+- **Success Response**: `201 Created`
+- **Error Responses**: `400 Bad Request`, `409 Conflict`
 
+### Login
 
-### Learning materials
-There is a lot of confusing materials about MVC on the internet, I recommend to start with original [explanation by Martin Fowler](https://martinfowler.com/eaaDev/uiArchs.html), author of Refactoring book and a short video fragment from [Robert Martin talk](https://youtu.be/Nsjsiz2A9mg?si=CobGPXOk6evh2wEr&t=1893) on a conference.
+- **POST** `/auth/login`
+- **Body**:
+  - `username`: String
+  - `password`: String
+- **Success Response**: `200 OK`
+  - **Body**: `{ "token": "JWT_TOKEN" }`
+- **Error Responses**: `400 Bad Request`, `401 Unauthorized`
 
-After this you can read other materials on the internet but be aware that you can find a lot of wrong arrows and ideas.
+## Games
+
+### Request a New Game
+
+- **POST** `/games`
+- **Headers**:
+  - `Authorization`: Bearer JWT_TOKEN
+- **Body**:
+  - `opponentType`: "player" | "cpu"
+- **Success Response**: `202 Accepted`
+  - **Body**:
+    ```json
+    {
+      "gameId": String,
+      "status": "waiting_for_opponent" | "ready"
+    }
+    ```
+- **Error Responses**: `401 Unauthorized`, `400 Bad Request`
+
+### Get Game Field
+
+- **GET** `/games/{gameId}`
+- **Headers**:
+  - `Authorization`: Bearer JWT_TOKEN
+- **Success Response**: `200 OK`
+  - **Body**:
+    ```json
+    {
+      "gameId": String,
+      "playerOne": String,
+      "playerTwo": String,
+      "status": "waiting" | "in_progress" | "completed",
+      "winner": CellState,
+      "field": Field
+    }
+    ```
+- **Error Responses**: `401 Unauthorized`, `404 Not Found`
+
+### Get Hint
+
+- **GET** `/games/{gameId}/hint`
+- **Headers**:
+  - `Authorization`: Bearer JWT_TOKEN
+- **Success Response**: `200 OK`
+  - **Body**:
+    ```json
+    {
+      "gameId": String,
+      "playerOne": String,
+      "playerTwo": String,
+      "status": "waiting" | "in_progress" | "completed",
+      "winner": CellState,
+      "field": Field,
+      "mask": List<bool,bool>
+    }
+    ```
+- **Error Responses**: `401 Unauthorized`, `404 Not Found`
+
+### Make a Move
+
+- **POST** `/games/{gameId}/move`
+- **Headers**:
+  - `Authorization`: Bearer JWT_TOKEN
+- **Body**:
+  - `x`: Number
+  - `y`: Number
+- **Success Response**: `200 OK`
+- **Error Responses**: `401 Unauthorized`, `400 Bad Request`, `404 Not Found`
+
+### Make a Undo
+
+- **POST** `/games/{gameId}/undo`
+- **Headers**:
+  - `Authorization`: Bearer JWT_TOKEN
+- **Body**:
+- **Success Response**: `200 OK`
+- **Error Responses**: `401 Unauthorized`, `400 Bad Request`, `404 Not Found`
+
+## Users
+
+### Get User Stats
+
+- **GET** `/users/{username}/stats`
+- **Headers**:
+  - `Authorization`: Bearer JWT_TOKEN
+- **Description**: Retrieves the total number of games played, wins, and losses for the user.
+- **Success Response**: `200 OK`
+  - **Body**:
+    ```json
+    {
+      "totalGames": Number,
+      "wins": Number,
+      "losses": Number
+    }
+    ```
+- **Error Responses**: `401 Unauthorized`, `404 Not Found`
+
+### Get User Game History
+
+- **GET** `/users/{username}/games`
+- **Headers**:
+  - `Authorization`: Bearer JWT_TOKEN
+- **Description**: Retrieves a list of games played by the user, including game IDs, opponents, outcomes, and dates.
+- **Success Response**: `200 OK`
+  - **Body**:
+    ```json
+    [
+      {
+        "gameId": String,
+        "opponent": String,
+        "outcome": "win" | "loss" | "draw",
+        "playedOn": String
+      }
+    ]
+    ```
+- **Error Responses**: `401 Unauthorized`, `404 Not Found`
+
+## Communication
+
+### Send a Message
+
+- **POST** `/games/{gameId}/react`
+- **Headers**:
+  - `Authorization`: Bearer JWT_TOKEN
+- **Body**:
+  - `emote`: Emote
+- **Success Response**: `201 Created`
+- **Error Responses**: `401 Unauthorized`, `400 Bad Request`, `404 Not Found`
+
+### Get Emotes
+
+- **GET** `/games/{gameId}/emotes`
+- **Headers**:
+  - `Authorization`: Bearer JWT_TOKEN
+- **Success Response**: `200 OK`
+  - **Body**:
+   ```json
+    [
+      {
+        "emote": List<Emote>
+      }
+    ]
+    ```
+- **Error Responses**: `401 Unauthorized`, `404 Not Found`
